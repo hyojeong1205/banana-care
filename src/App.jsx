@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
-import { CalendarDays, Check, Plus, Trash2, Upload, Download, Dog, Activity, Syringe, Pill, Bath, Footprints, Baby, School, Sparkles, Utensils, Scale } from "lucide-react";
+
 /**
  * Banana Care Tracker – Mobile-first React (Vite) app
  * - LocalStorage persistence
@@ -57,10 +57,9 @@ function load() {
 }
 function save(data) { localStorage.setItem(KEY, JSON.stringify(data)); }
 
-const Card = ({ title, icon, children, footer, className }) => (
+const Card = ({ title, children, footer, className }) => (
   <div className={classNames("bg-white rounded-2xl shadow p-4 mb-4", className)}>
-    <div className="flex items-center gap-2 mb-2">
-      {icon}
+    <div className="mb-2">
       <h2 className="text-lg font-semibold">{title}</h2>
     </div>
     <div>{children}</div>
@@ -70,7 +69,7 @@ const Card = ({ title, icon, children, footer, className }) => (
 
 const SectionTitle = ({ children }) => (
   <h1 className="text-2xl font-bold mb-3 flex items-center gap-2">
-    <Dog className="w-6 h-6" /> {children}
+    {children}
   </h1>
 );
 
@@ -149,14 +148,14 @@ export default function BananaCareApp() {
       <header className="sticky top-0 z-10 bg-white/80 backdrop-blur border-b">
         <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2 font-bold text-lg">
-            <Dog className="w-6 h-6" /> 바나 케어 트래커
+            바나 케어 트래커
           </div>
           <div className="flex items-center gap-2">
             <button onClick={exportJSON} className="px-2 py-1 text-sm rounded-xl border flex items-center gap-1">
-              <Download className="w-4 h-4" /> 내보내기
+              내보내기
             </button>
             <label className="px-2 py-1 text-sm rounded-xl border flex items-center gap-1 cursor-pointer">
-              <Upload className="w-4 h-4" /> 가져오기
+              가져오기
               <input className="hidden" type="file" accept="application/json" onChange={(e) => e.target.files?.[0] && importJSON(e.target.files[0])} />
             </label>
           </div>
@@ -212,10 +211,10 @@ export default function BananaCareApp() {
 
       <nav className="fixed bottom-0 inset-x-0 bg-white border-t">
         <div className="max-w-2xl mx-auto grid grid-cols-4 text-sm">
-          <TabButton icon={<Activity className="w-5 h-5" />} label="대시보드" active={activeTab === "dashboard"} onClick={() => setActiveTab("dashboard")} />
-          <TabButton icon={<Pill className="w-5 h-5" />} label="건강/위생" active={activeTab === "health"} onClick={() => setActiveTab("health")} />
-          <TabButton icon={<Footprints className="w-5 h-5" />} label="활동" active={activeTab === "activity"} onClick={() => setActiveTab("activity")} />
-          <TabButton icon={<Scale className="w-5 h-5" />} label="몸무게" active={activeTab === "scale"} onClick={() => setActiveTab("scale")} />
+          <TabButton label="대시보드" active={activeTab === "dashboard"} onClick={() => setActiveTab("dashboard")} />
+          <TabButton label="건강/위생" active={activeTab === "health"} onClick={() => setActiveTab("health")} />
+          <TabButton label="활동" active={activeTab === "activity"} onClick={() => setActiveTab("activity")} />
+          <TabButton label="몸무게" active={activeTab === "scale"} onClick={() => setActiveTab("scale")} />
         </div>
       </nav>
     </div>
@@ -248,9 +247,8 @@ function Tabs({ active, onChange }) {
   );
 }
 
-const TabButton = ({ icon, label, active, onClick }) => (
+const TabButton = ({ label, active, onClick }) => (
   <button onClick={onClick} className={classNames("flex flex-col items-center py-2", active ? "text-black" : "text-gray-500") }>
-    {icon}
     <span className="text-[11px]">{label}</span>
   </button>
 );
@@ -262,31 +260,27 @@ function Dashboard({ data, dueRecurring, toggleDailySupplement, completeVaccine,
       <div className="grid grid-cols-2 gap-3">
         <QuickCheck
           title="영양제"
-          icon={<Pill className="w-5 h-5" />}
           done={!!data.dailySupplements.log[todayStr()]}
           onClick={() => toggleDailySupplement()}
         />
         <QuickCheck
           title="아침 밥"
-          icon={<Utensils className="w-5 h-5" />}
           done={!!data.meals.AM[todayStr()]}
           onClick={() => toggleMeal("AM")}
         />
         <QuickCheck
           title="저녁 밥"
-          icon={<Utensils className="w-5 h-5" />}
           done={!!data.meals.PM[todayStr()]}
           onClick={() => toggleMeal("PM")}
         />
         <QuickCheck
           title="양치"
-          icon={<Sparkles className="w-5 h-5" />}
           done={!!data.sparkles.log[todayStr()]}
           onClick={() => toggleSparkles()}
         />
       </div>
 
-      <Card title="주기 관리" icon={<CalendarDays className="w-5 h-5" />}>
+      <Card title="주기 관리">
         <ul className="divide-y">
           {dueRecurring.map((it) => (
             <li key={it.key} className="flex items-center justify-between py-2">
@@ -309,11 +303,11 @@ function Dashboard({ data, dueRecurring, toggleDailySupplement, completeVaccine,
       </Card>
 
       <div className="grid grid-cols-2 gap-3">
-        <Card title="예방접종" icon={<Syringe className="w-5 h-5" />}>
+        <Card title="예방접종">
           <button onClick={completeVaccine} className="w-full px-3 py-2 rounded-xl border">완료 기록</button>
           <HistoryList items={data.vaccine.history} empty="기록 없음" />
         </Card>
-        <Card title="심장사상충" icon={<Activity className="w-5 h-5" />}>
+        <Card title="심장사상충">
           <button onClick={completeHeartworm} className="w-full px-3 py-2 rounded-xl border">완료 기록</button>
           <HistoryList items={data.heartworm.history} empty="기록 없음" />
         </Card>
@@ -328,17 +322,17 @@ function HealthSection({ data, toggleDailySupplement, addPrnMed, completeRecurri
 
   return (
     <div>
-      <Card title="매일 영양제" icon={<Pill className="w-5 h-5" />}>
+      <Card title="매일 영양제">
         <div className="flex items-center gap-2 mb-2">
           <button onClick={() => toggleDailySupplement()} className="px-3 py-2 rounded-xl border flex items-center gap-2">
-            <Check className="w-4 h-4" /> 오늘 복용
+            오늘 복용
           </button>
           <span className="px-2 py-0.5 text-xs rounded-full bg-emerald-100 text-emerald-700">{todayStr()}</span>
         </div>
         <HistoryToggleMap map={data.dailySupplements.log} />
       </Card>
 
-      <Card title="증상 시 복용(용량 기록)" icon={<Pill className="w-5 h-5" />}>
+      <Card title="증상 시 복용(용량 기록)">
         <div className="flex gap-2 mb-2">
           <input className="flex-1 px-3 py-2 rounded-xl border" placeholder="용량(ex. 5mg/1정)" value={dose} onChange={(e) => setDose(e.target.value)} />
           <button
@@ -356,7 +350,7 @@ function HealthSection({ data, toggleDailySupplement, addPrnMed, completeRecurri
         />
       </Card>
 
-      <Card title="주기적 관리" icon={<Bath className="w-5 h-5" />}>
+      <Card title="주기적 관리">
         <ul className="divide-y">
           {dueRecurring.map((it) => (
             <li key={it.key} className="flex items-center justify-between py-2">
@@ -383,10 +377,10 @@ function HealthSection({ data, toggleDailySupplement, addPrnMed, completeRecurri
       </Card>
 
       <div className="grid grid-cols-2 gap-3">
-        <Card title="예방접종(연 1회)" icon={<Syringe className="w-5 h-5" />}>
+        <Card title="예방접종(연 1회)">
           <HistoryList items={data.vaccine.history} empty="기록 없음" />
         </Card>
-        <Card title="심장사상충(월 1회)" icon={<Activity className="w-5 h-5" />}>
+        <Card title="심장사상충(월 1회)">
           <HistoryList items={data.heartworm.history} empty="기록 없음" />
         </Card>
       </div>
@@ -401,12 +395,12 @@ function ActivitySection({ walks, addWalk, poop, addPoop, meals, toggleMeal, spa
 
   return (
     <div>
-      <Card title="산책" icon={<Footprints className="w-5 h-5" />}>
+      <Card title="산책">
         <div className="flex gap-2 mb-2">
           <input className="w-28 px-3 py-2 rounded-xl border" placeholder="분" inputMode="numeric" value={walkMin} onChange={(e) => setWalkMin(e.target.value)} />
           <input className="flex-1 px-3 py-2 rounded-xl border" placeholder="메모(코스/컨디션)" value={walkNote} onChange={(e) => setWalkNote(e.target.value)} />
           <button onClick={() => { addWalk(walkMin || 0, walkNote); setWalkMin(""); setWalkNote(""); }} className="px-3 py-2 rounded-xl border flex items-center gap-1">
-            <Plus className="w-4 h-4" /> 추가
+            추가
           </button>
         </div>
         <ListTable
@@ -417,7 +411,7 @@ function ActivitySection({ walks, addWalk, poop, addPoop, meals, toggleMeal, spa
       </Card>
 
       <div className="grid grid-cols-2 gap-3">
-        <Card title="식사" icon={<Utensils className="w-5 h-5" />}>
+        <Card title="식사">
           <div className="flex gap-2 mb-2">
             <button onClick={() => toggleMeal("AM")} className="flex-1 px-3 py-2 rounded-xl border">아침 먹음</button>
             <button onClick={() => toggleMeal("PM")} className="flex-1 px-3 py-2 rounded-xl border">저녁 먹음</button>
@@ -426,17 +420,17 @@ function ActivitySection({ walks, addWalk, poop, addPoop, meals, toggleMeal, spa
           <HistoryToggleMap map={meals.PM} label="저녁" />
         </Card>
 
-        <Card title="양치" icon={<Sparkles className="w-5 h-5" />}>
+        <Card title="양치">
           <button onClick={() => toggleSparkles()} className="w-full px-3 py-2 rounded-xl border mb-2">오늘 양치</button>
           <HistoryToggleMap map={sparkles.log} />
         </Card>
       </div>
 
-      <Card title="배변" icon={<Baby className="w-5 h-5" />}>
+      <Card title="배변">
         <div className="flex gap-2 mb-2">
           <input className="flex-1 px-3 py-2 rounded-xl border" placeholder="메모(상태 등)" value={poopNote} onChange={(e) => setPoopNote(e.target.value)} />
           <button onClick={() => { addPoop(poopNote); setPoopNote(""); }} className="px-3 py-2 rounded-xl border flex items-center gap-1">
-            <Plus className="w-4 h-4" /> 기록
+            기록
           </button>
         </div>
         <ListTable
@@ -470,7 +464,7 @@ function KindergartenSection({ list, add, remove }) {
 
   return (
     <div>
-      <Card title="유치원" icon={<School className="w-5 h-5" />}
+      <Card title="유치원"
         footer={<span className="text-xs">사진은 이 기기 로컬 저장소에만 보관됩니다(백업 시 JSON에 포함되지 않음).</span>}>
         <textarea className="w-full px-3 py-2 rounded-xl border mb-2" placeholder="오늘 한 일(간단 메모)" value={note} onChange={(e) => setNote(e.target.value)} />
         <div className="flex items-center gap-2 mb-2">
@@ -512,7 +506,7 @@ function ScaleSection({ scaleData, addScale }) {
 
   return (
     <div>
-              <Card title="몸무게 기록" icon={<Scale className="w-5 h-5" />}>
+              <Card title="몸무게 기록">
           <div className="flex items-center gap-2 mb-4">
             <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="px-3 py-2 rounded-xl border" />
             <input type="number" step="0.01" placeholder="kg" value={kg} onChange={(e) => setKg(e.target.value)} className="px-3 py-2 rounded-xl border w-28" />
@@ -534,10 +528,9 @@ function ScaleSection({ scaleData, addScale }) {
   );
 }
 
-const QuickCheck = ({ title, icon, done, onClick }) => (
+const QuickCheck = ({ title, done, onClick }) => (
   <button onClick={onClick} className={classNames("p-3 rounded-2xl border text-left", done ? "bg-emerald-50 border-emerald-300" : "bg-white") }>
     <div className="flex items-center gap-2">
-      {icon}
       <div className="font-medium">{title}</div>
     </div>
     <div className="text-xs text-gray-500 mt-1">{todayStr()} {done ? "완료" : "미완료"}</div>
