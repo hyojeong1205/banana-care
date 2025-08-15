@@ -53,12 +53,14 @@ export default function App() {
   useEffect(() => { save(state); }, [state]);
 
   // 오늘 요약 타임라인용 헬퍼
-  const addTimeline = (label, color) => {
+  const addTimeline = (label, color, dateOverride, timeOverride) => {
+    const timeToSave = timeOverride || nowTime();
+    const dateToSave = dateOverride || todayStr();
     setState(prev => ({
       ...prev,
       timeline: [
         ...prev.timeline,
-        { time: nowTime(), label, color }
+        { time: timeToSave, label, color }
       ]
     }));
     // 캘린더 점 표시용
@@ -66,9 +68,24 @@ export default function App() {
       ...prev,
       calendar: {
         ...prev.calendar,
-        [todayStr()]: Array.from(new Set([...(prev.calendar[todayStr()] || []), label]))
+        [dateToSave]: Array.from(new Set([...(prev.calendar[dateToSave] || []), label]))
       }
     }));
+  };
+
+  const deleteTimelineAt = (index) => {
+    setState(prev => {
+      const nextTimeline = prev.timeline.filter((_, i) => i !== index);
+      const todaysLabels = Array.from(new Set(nextTimeline.map(t => t.label)));
+      return {
+        ...prev,
+        timeline: nextTimeline,
+        calendar: {
+          ...prev.calendar,
+          [todayStr()]: todaysLabels,
+        },
+      };
+    });
   };
 
   return (
@@ -84,6 +101,16 @@ export default function App() {
               routine={state.routine}
               upcoming={state.upcoming}
               onQuickAdd={addTimeline}
+              onApplyTimeline={(next) => {
+                setState(prev => ({
+                  ...prev,
+                  timeline: next,
+                  calendar: {
+                    ...prev.calendar,
+                    [todayStr()]: Array.from(new Set(next.map(t => t.label)))
+                  }
+                }));
+              }}
             />
           )}
           {tab === "health" && (
@@ -91,13 +118,19 @@ export default function App() {
               weight={state.weight}
               meds={state.meds}
               walks={state.walks}
-              onAddWeight={(kg) => setState(p => ({ ...p, weight: [...p.weight, makeWeightEntry(kg)] }))}
+              onAddWeight={(kg, date) => setState(p => ({ ...p, weight: [...p.weight, makeWeightEntry(kg, date)] }))}
               onAddMed={(type, dose) => setState(p => ({ ...p, meds: [...p.meds, makeMedEntry(type, dose)] }))}
               onAddWalk={(start, end, minutes) => setState(p => ({ ...p, walks: [...p.walks, makeWalkEntry(start, end, minutes)] }))}
             />
           )}
           {tab === "diary" && (
-            <DiaryScreen routine={state.routine} onChange={(r) => setState(p => ({ ...p, routine: r }))} />
+            <DiaryScreen />
+          )}
+          {tab === "settings" && (
+            <SettingsScreen
+              routine={state.routine}
+              onChange={(r)=> setState(p => ({ ...p, routine: r }))}
+            />
           )}
         </main>
 
@@ -111,7 +144,7 @@ function Header() {
   return (
     <header className="sticky top-0 z-10 bg-white/90 backdrop-blur border-b px-6 pt-[env(safe-area-inset-top)]">
       <div className="h-16 flex items-end">
-        <h1 className="font-bold text-2xl tracking-tight">Banana Care</h1>
+        <h1 className="font-bold text-2xl tracking-tight -mt-1 mb-1">Banana Care</h1>
       </div>
     </header>
   );
@@ -123,19 +156,19 @@ function BottomNav({ tab, onChange }) {
       onClick={() => onChange(id)}
       className={`flex flex-col items-center justify-center ${tab === id ? "text-blue-700 font-semibold" : "text-gray-600"}`}
     >
-      <span className="text-sm">{label}</span>
+      {id === "home" && <img src="/image/home.png" alt="홈" className="w-5 h-5" />}
+      {id !== "home" && <span className="text-sm">{label}</span>}
     </button>
   );
   return (
     <nav className="fixed bottom-0 left-0 right-0 flex justify-center">
       <div className="w-full max-w-[420px] border-t bg-white px-6 pb-[env(safe-area-inset-bottom)]">
-        <div className="h-14 grid grid-cols-4">
+        <div className="h-14 grid grid-cols-5">
           <Item id="calendar" label="캘린더" />
-          <Item id="today" label="오늘" />
-          <Item id="home" label="홈" />
           <Item id="health" label="건강" />
-          {/* 디자인엔 다이어리 탭도 있어 보였으므로 필요 시 교체 */}
-          {/* <Item id="diary" label="다이어리" /> */}
+          <Item id="home" label="홈" />
+          <Item id="diary" label="다이어리" />
+          <Item id="settings" label="설정" />
         </div>
       </div>
     </nav>
@@ -190,27 +223,70 @@ function CalendarScreen({ calendar }) {
 /***************************
  * 홈(오늘) 화면
  ***************************/
-function HomeScreen({ timeline, routine, upcoming, onQuickAdd }) {
+function HomeScreen({ timeline, routine, upcoming, onQuickAdd, onApplyTimeline }) {
+  const [editMode, setEditMode] = useState(false);
+  const [draftTimeline, setDraftTimeline] = useState(null);
+  const [confirm, setConfirm] = useState(null); // {label,color,date,time}
   return (
     <div className="space-y-6">
       {/* 오늘 요약 */}
       <Card>
         <div className="flex items-center justify-between mb-3">
-          <div className="font-semibold">오늘 요약</div>
-          <div className="text-sm text-gray-500">{todayStr()}</div>
+          <div className="flex items-center gap-2">
+            <div className="font-semibold">오늘 요약</div>
+            <div className="text-sm text-gray-500">{todayStr()}</div>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              if (!editMode) {
+                setDraftTimeline(timeline);
+                setEditMode(true);
+              } else {
+                onApplyTimeline(draftTimeline || []);
+                setEditMode(false);
+                setDraftTimeline(null);
+              }
+            }}
+            className="w-8 h-8 grid place-items-center rounded-lg border"
+            title={editMode ? "완료" : "편집"}
+            aria-pressed={editMode}
+          >
+            {editMode ? (
+              <span className="text-xs font-medium">완료</span>
+            ) : (
+              <img src="/image/edit.png" alt="편집" className="w-4 h-4" />
+            )}
+          </button>
         </div>
         <div className="rounded-xl bg-white">
-          {timeline.length === 0 ? (
+          {(editMode ? (draftTimeline?.length || 0) : timeline.length) === 0 ? (
             <div className="text-sm text-gray-400">아직 기록이 없어요</div>
           ) : (
             <ul className="space-y-2">
-              {timeline.slice().reverse().map((t, idx) => (
-                <li key={idx} className="flex items-center gap-3">
-                  <span className="w-3 h-3 rounded-full" style={{ backgroundColor: t.color || "#E6F4EA" }} />
-                  <span className="text-sm text-gray-500 w-20">{t.time}</span>
-                  <span className="text-sm">{t.label}</span>
-                </li>
-              ))}
+              {(editMode ? draftTimeline : timeline).slice().reverse().map((t, idx, arr) => {
+                const originalIndex = (editMode ? draftTimeline : timeline).length - 1 - idx;
+                return (
+                  <li key={idx} className="flex items-center gap-3">
+                    <span className="w-3 h-3 rounded-full" style={{ backgroundColor: t.color || "#E6F4EA" }} />
+                    <span className="text-sm text-gray-500 w-20">{t.time}</span>
+                    <span className="text-sm">{t.label}</span>
+                    {editMode && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setDraftTimeline(prev => prev.filter((_, i) => i !== originalIndex));
+                        }}
+                        className="ml-auto w-6 h-6 grid place-items-center rounded-full border text-xs text-gray-600"
+                        aria-label="삭제"
+                        title="삭제"
+                      >
+                        ×
+                      </button>
+                    )}
+                  </li>
+                );
+              })}
             </ul>
           )}
         </div>
@@ -220,11 +296,11 @@ function HomeScreen({ timeline, routine, upcoming, onQuickAdd }) {
       <section>
         <h3 className="font-semibold text-lg mb-2">데일리루틴</h3>
         <div className="text-sm text-gray-500 mb-1">오전</div>
-        <ChipRow labels={routine.am} onAdd={(l)=>onQuickAdd(l, "#E6F4EA")} />
+        <ChipRow labels={routine.am} onAdd={(l)=>setConfirm({ label:l, color: "#E6F4EA", date: todayStr(), time: nowTime() })} />
         <div className="text-sm text-gray-500 mt-3 mb-1">오후</div>
-        <ChipRow labels={routine.pm} onAdd={(l)=>onQuickAdd(l, "#E7F0FF")} />
+        <ChipRow labels={routine.pm} onAdd={(l)=>setConfirm({ label:l, color: "#E7F0FF", date: todayStr(), time: nowTime() })} />
         <h4 className="font-semibold text-lg mt-5 mb-2">정기루틴</h4>
-        <ChipRow labels={routine.reg} onAdd={(l)=>onQuickAdd(l, "#FDF0D5")} />
+        <ChipRow labels={routine.reg} onAdd={(l)=>setConfirm({ label:l, color: "#FDF0D5", date: todayStr(), time: nowTime() })} />
       </section>
 
       {/* 다가오는 일정 */}
@@ -244,6 +320,26 @@ function HomeScreen({ timeline, routine, upcoming, onQuickAdd }) {
           </ul>
         )}
       </Card>
+
+      {confirm && (
+        <Modal onClose={()=>setConfirm(null)}>
+          <div className="space-y-3 text-center">
+            <div className="font-semibold text-lg">기록 하시겠습니까?</div>
+            <div className="text-sm text-gray-600"><span className="font-medium">{confirm.label}</span></div>
+            <div className="text-sm text-gray-600"><span className="font-medium">{confirm.date}</span></div>
+            <div className="text-sm text-gray-600"><span className="font-medium">{confirm.time}</span></div>
+            <div className="flex gap-2 justify-center pt-2">
+              <button className="px-3 py-2 rounded-xl border" onClick={()=>setConfirm(null)}>취소</button>
+              <button
+                className="px-3 py-2 rounded-xl border bg-black text-white"
+                onClick={() => { onQuickAdd(confirm.label, confirm.color, confirm.date, confirm.time); setConfirm(null); }}
+              >
+                확인
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }
@@ -256,7 +352,6 @@ function ChipRow({ labels, onAdd }) {
           {label}
         </button>
       ))}
-      <div className="min-w-[92px] h-12 rounded-2xl border border-dashed grid place-items-center text-gray-400">+</div>
     </div>
   );
 }
@@ -287,14 +382,21 @@ function HealthScreen({ weight, meds, walks, onAddWeight, onAddMed, onAddWalk })
 
 function WeightTab({ list, onAdd }) {
   const [kg, setKg] = useState("");
+  const [date, setDate] = useState(todayStr());
   const data = useMemo(()=> list.map(i=>({ date:i.date, kg:i.kg })),[list]);
   return (
     <div className="space-y-6">
       <Card className="bg-blue-50"> 
         <div className="font-medium mb-2">몸무게 입력</div>
         <div className="flex gap-2">
+          <input 
+            type="date" 
+            value={date} 
+            onChange={(e)=>setDate(e.target.value)} 
+            className="px-3 py-2 rounded-xl border" 
+          />
           <input type="number" step="0.01" placeholder="kg" value={kg} onChange={(e)=>setKg(e.target.value)} className="px-3 py-2 rounded-xl border w-28" />
-          <button onClick={()=>{ if(!kg) return; onAdd(parseFloat(kg)); setKg(""); }} className="px-3 py-2 rounded-xl border">추가</button>
+          <button onClick={()=>{ if(!kg) return; onAdd(parseFloat(kg), date); setKg(""); setDate(todayStr()); }} className="px-3 py-2 rounded-xl border">추가</button>
         </div>
       </Card>
       <section>
@@ -370,18 +472,175 @@ function WalkTab({ list, onAdd }) {
 /***************************
  * 다이어리(카테고리 설정) 화면
  ***************************/
-function DiaryScreen({ routine, onChange }) {
-  const update = (where, label) => {
-    onChange({ ...routine, [where]: Array.from(new Set([...(routine[where]||[]), label])) });
+function DiaryScreen() {
+  const [entries, setEntries] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const [newEntry, setNewEntry] = useState({
+    date: todayStr(),
+    title: "",
+    content: "",
+    image: null
+  });
+
+  const addEntry = () => {
+    if (newEntry.title.trim() && newEntry.content.trim()) {
+      setEntries(prev => [...prev, { ...newEntry, id: Date.now() }]);
+      setNewEntry({ date: todayStr(), title: "", content: "", image: null });
+      setShowModal(false);
+    }
   };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setNewEntry(prev => ({ ...prev, image: e.target.result }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  return (
+    <section>
+      <div className="font-semibold text-xl mb-4">다이어리</div>
+      
+      {/* 새 일기 작성 버튼 */}
+      <button
+        onClick={() => setShowModal(true)}
+        className="w-full h-12 rounded-2xl border border-dashed border-gray-300 text-gray-500 mb-6 flex items-center justify-center gap-2"
+      >
+        <span className="text-lg">+</span>
+        <span>새 일기 작성</span>
+      </button>
+
+      {/* 일기 목록 */}
+      <div className="space-y-4">
+        {entries.length === 0 ? (
+          <div className="text-center py-8 text-gray-400">
+            <div className="text-lg mb-2">아직 작성된 일기가 없어요</div>
+            <div className="text-sm">첫 번째 일기를 작성해보세요!</div>
+          </div>
+        ) : (
+          entries.slice().reverse().map((entry) => (
+            <Card key={entry.id}>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="text-sm text-gray-500">{entry.date}</div>
+                  <div className="text-xs text-gray-400">#{entry.id}</div>
+                </div>
+                <div className="font-semibold text-lg">{entry.title}</div>
+                <div className="text-gray-700 whitespace-pre-wrap leading-relaxed">{entry.content}</div>
+                {entry.image && (
+                  <img src={entry.image} alt="일기 이미지" className="w-full h-48 object-cover rounded-xl" />
+                )}
+              </div>
+            </Card>
+          ))
+        )}
+      </div>
+
+      {/* 새 일기 작성 모달 */}
+      {showModal && (
+        <Modal onClose={() => setShowModal(false)}>
+          <div className="space-y-4 text-center">
+            <div className="font-semibold text-lg">새 일기 작성</div>
+            
+            <div className="space-y-3">
+              <input
+                type="date"
+                value={newEntry.date}
+                onChange={(e) => setNewEntry(prev => ({ ...prev, date: e.target.value }))}
+                className="w-full px-3 py-2 rounded-xl border text-center"
+              />
+              
+              <input
+                type="text"
+                placeholder="제목"
+                value={newEntry.title}
+                onChange={(e) => setNewEntry(prev => ({ ...prev, title: e.target.value }))}
+                className="w-full px-3 py-2 rounded-xl border text-center"
+              />
+              
+              <textarea
+                placeholder="내용을 입력하세요..."
+                value={newEntry.content}
+                onChange={(e) => setNewEntry(prev => ({ ...prev, content: e.target.value }))}
+                className="w-full px-3 py-2 rounded-xl border text-center min-h-[100px] resize-none"
+              />
+              
+              <div className="space-y-2">
+                <label className="block text-sm text-gray-600">이미지 추가</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className="w-full px-3 py-2 rounded-xl border text-center"
+                />
+                {newEntry.image && (
+                  <img src={newEntry.image} alt="미리보기" className="w-full h-32 object-cover rounded-xl" />
+                )}
+              </div>
+            </div>
+            
+            <div className="flex gap-2 justify-center pt-2">
+              <button className="px-3 py-2 rounded-xl border" onClick={() => setShowModal(false)}>취소</button>
+              <button
+                className="px-3 py-2 rounded-xl border bg-black text-white"
+                onClick={addEntry}
+              >
+                작성
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
+    </section>
+  );
+}
+
+/***************************
+ * 설정 화면
+ ***************************/
+function SettingsScreen({ routine, onChange }) {
+  const [showModal, setShowModal] = useState(false);
+  const [deleteModal, setDeleteModal] = useState(null);
+  const [newRoutine, setNewRoutine] = useState({ name: "", type: "daily", time: "am", frequency: "daily" });
+
+  const addRoutine = () => {
+    if (newRoutine.name.trim()) {
+      const where = newRoutine.type === "daily" ? newRoutine.time : "reg";
+      onChange({ ...routine, [where]: Array.from(new Set([...(routine[where]||[]), newRoutine.name.trim()])) });
+      setNewRoutine({ name: "", type: "daily", time: "am", frequency: "daily" });
+      setShowModal(false);
+    }
+  };
+
+  const deleteRoutine = (where, index) => {
+    const newList = routine[where].filter((_, i) => i !== index);
+    onChange({ ...routine, [where]: newList });
+    setDeleteModal(null);
+  };
+
   const Row = ({ title, list, where }) => (
     <div className="mb-6">
-      <div className="text-sm text-gray-600 mb-2">{title}</div>
+      {title && <div className="text-sm text-gray-600 mb-2">{title}</div>}
       <div className="flex flex-wrap gap-3">
-        {list.map((l) => (
-          <span key={l} className="min-w-[92px] h-12 rounded-2xl border bg-white grid place-items-center px-4">{l}</span>
+        {list.map((l, index) => (
+          <div key={l} className="relative">
+            <span className="min-w-[92px] h-12 rounded-2xl border bg-white flex items-center justify-between px-4">
+              <span>{l}</span>
+              <button
+                onClick={() => setDeleteModal({ where, index, label: l })}
+                className="w-6 h-6 flex items-center justify-center"
+                title="삭제"
+              >
+                <img src="/image/delete.png" alt="삭제" className="w-4 h-4" />
+              </button>
+            </span>
+          </div>
         ))}
-        <button onClick={()=>update(where, "새 항목")} className="min-w-[92px] h-12 rounded-2xl border border-dashed text-gray-400">+</button>
+        <button onClick={() => setShowModal(true)} className="min-w-[92px] h-12 rounded-2xl border border-dashed grid place-items-center text-gray-400">+</button>
       </div>
     </div>
   );
@@ -394,6 +653,96 @@ function DiaryScreen({ routine, onChange }) {
       <Row title="오후" list={routine.pm} where="pm" />
       <div className="font-semibold text-lg mt-2 mb-2">정기루틴</div>
       <Row title="" list={routine.reg} where="reg" />
+
+      {showModal && (
+        <Modal onClose={() => setShowModal(false)}>
+          <div className="space-y-3 text-center">
+            <div className="font-semibold text-lg">새 루틴 추가</div>
+            <div className="space-y-2">
+              <input
+                type="text"
+                placeholder="루틴 이름"
+                value={newRoutine.name}
+                onChange={(e) => setNewRoutine(prev => ({ ...prev, name: e.target.value }))}
+                className="w-full px-3 py-2 rounded-xl border text-center"
+              />
+              <select
+                value={newRoutine.type}
+                onChange={(e) => setNewRoutine(prev => ({ ...prev, type: e.target.value, time: e.target.value === "daily" ? "am" : "am" }))}
+                className="w-full px-3 py-2 rounded-xl border text-center"
+              >
+                <option value="daily">데일리루틴</option>
+                <option value="regular">정기루틴</option>
+              </select>
+              {newRoutine.type === "daily" && (
+                <div className="flex gap-2 justify-center">
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="time"
+                      value="am"
+                      checked={newRoutine.time === "am"}
+                      onChange={(e) => setNewRoutine(prev => ({ ...prev, time: e.target.value }))}
+                    />
+                    <span className="text-sm">오전</span>
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="time"
+                      value="pm"
+                      checked={newRoutine.time === "pm"}
+                      onChange={(e) => setNewRoutine(prev => ({ ...prev, time: e.target.value }))}
+                    />
+                    <span className="text-sm">오후</span>
+                  </label>
+                </div>
+              )}
+              {newRoutine.type === "regular" && (
+                <select
+                  value={newRoutine.frequency}
+                  onChange={(e) => setNewRoutine(prev => ({ ...prev, frequency: e.target.value }))}
+                  className="w-full px-3 py-2 rounded-xl border text-center"
+                >
+                  <option value="daily">매일</option>
+                  <option value="weekly">매주 {new Date().toLocaleDateString('ko-KR', { weekday: 'long' })}</option>
+                  <option value="monthly">매월 {new Date().getDate()}일</option>
+                  <option value="yearly">매년 {new Date().getMonth() + 1}월 {new Date().getDate()}일</option>
+                </select>
+              )}
+            </div>
+            <div className="flex gap-2 justify-center pt-2">
+              <button className="px-3 py-2 rounded-xl border" onClick={() => setShowModal(false)}>취소</button>
+              <button
+                className="px-3 py-2 rounded-xl border bg-black text-white"
+                onClick={addRoutine}
+              >
+                추가
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
+
+      {deleteModal && (
+        <Modal onClose={() => setDeleteModal(null)}>
+          <div className="space-y-3 text-center">
+            <div className="font-semibold text-lg">삭제하시겠습니까?</div>
+            <div className="text-sm text-gray-600">
+              <span className="font-medium">{deleteModal.label}</span> 루틴을 삭제하시겠습니까?
+            </div>
+            <div className="flex gap-2 justify-center pt-2">
+              <button className="px-3 py-2 rounded-xl border" onClick={() => setDeleteModal(null)}>취소</button>
+              <button
+                className="px-3 py-2 rounded-xl border bg-red-500 text-white"
+                onClick={() => deleteRoutine(deleteModal.where, deleteModal.index)}
+              >
+                예
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
     </section>
   );
 }
@@ -430,14 +779,25 @@ function Table({ cols = [], rows = [] }) {
   );
 }
 
+function Modal({ children, onClose }) {
+  return (
+    <div className="fixed inset-0 z-20 flex items-center justify-center px-6">
+      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
+      <div className="relative w-full max-w-[380px] bg-white rounded-2xl border p-4 shadow-lg">
+        {children}
+      </div>
+    </div>
+  );
+}
+
 /***************************
  * 엔트리 생성기
  ***************************/
-function makeWeightEntry(kg) {
+function makeWeightEntry(kg, date) {
   const prev = load().weight.slice(-1)[0];
   const lastKg = prev?.kg || 0;
   const diff = lastKg ? +(kg - lastKg).toFixed(1) : 0;
-  return { date: todayStr(), time: nowTime(), kg: +kg, diff };
+  return { date: date, time: nowTime(), kg: +kg, diff };
 }
 function makeMedEntry(type, dose) {
   return { date: todayStr(), time: nowTime(), type, dose };
