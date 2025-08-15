@@ -2,568 +2,425 @@ import React, { useEffect, useMemo, useState } from "react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 
 /**
- * Banana Care Tracker – Mobile-first React (Vite) app
- * - LocalStorage persistence
- * - Daily / monthly / yearly checklists with history
- * - As-needed medication logging (date/time/dose)
- * - Recurring care tasks (daily/2day/weekly/bi-weekly/quarterly)
- * - Walks (date + duration)
- * - Kindergarten attendance with photos & notes
- * - Meals (AM/PM) quick log
- * - Sparkles brushing quick log
- * - Poop log (multi/day)
- * - Scale log with line chart
- * - JSON import/export (backup)
+ * Banana Care – 디자인 반영 단일 파일(App.jsx 대체용)
+ * - 반응형 모바일(최대폭 420px) + sticky header + bottom nav
+ * - 탭: 캘린더 / 오늘(홈) / 건강 / 다이어리(카테고리 설정)
+ * - 로컬스토리지 저장
+ * - 몸무게 라인차트(Recharts)
+ *
+ * 사용법: 프로젝트의 src/App.jsx 내용을 이 파일로 교체하세요.
  */
 
-const KEY = "banana-care-tracker-v1";
+const KEY = "banana-care-v2";
 const todayStr = () => new Date().toISOString().slice(0, 10);
-const nowTime = () => new Date().toTimeString().slice(0, 5);
-const ts = () => new Date().toISOString();
+const nowTime = () => new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
-function uid() { return Math.random().toString(36).slice(2) + Date.now().toString(36); }
-function classNames(...arr) { return arr.filter(Boolean).join(" "); }
-function fmtDate(d) {
-  try { const dt = new Date(d); if (Number.isNaN(dt.getTime())) return d; return dt.toLocaleString(); }
-  catch { return d; }
-}
-
-const defaultData = {
-  dailySupplements: { log: {}, name: "영양제(매일)" },
-  prnMeds: [],
-  recurring: {
-    items: [
-      { key: "tear", name: "눈물 닦기", everyDays: 1, history: [] },
-      { key: "pawSanitize", name: "발 소독", everyDays: 2, history: [] },
-      { key: "earClean", name: "귀청소", everyDays: 2, history: [] },
-      { key: "nailTrim", name: "발톱깎기", everyDays: 14, history: [] },
-      { key: "bath", name: "목욕", everyDays: 7, history: [] },
-      { key: "grooming", name: "미용", everyDays: 90, history: [] },
-    ]
+const defaultState = {
+  // 캘린더용 샘플 로그 (date -> ["영양제","산책",...])
+  calendar: {
+    // 예시 데이터
+    // "2025-08-05": ["영양제", "아침식사", "저녁식사", "양치"],
   },
-  walks: [],
-  vaccine: { name: "예방접종(연 1회)", last: null, history: [] },
-  heartworm: { name: "심장사상충(월 1회)", last: null, history: [] },
-  kindergarten: [],
-  meals: { AM: {}, PM: {} },
-  sparkles: { log: {} },
-  poop: [],
-  scale: [],
+  // 오늘 요약 타임라인
+  timeline: [], // [{time: "09:32 PM", label: "관절영양제", color:"#E6F4EA"}]
+  // 루틴 카테고리
+  routine: {
+    am: ["양치", "아침식사", "눈영양제"],
+    pm: ["산책", "저녁식사", "관절영양제"],
+    reg: ["목욕", "미용", "발톱깎기"],
+  },
+  // 이벤트(다가오는 일정)
+  upcoming: [
+    { label: "귀청소", d: -3, color: "#F9E1F1" },
+    { label: "예방접종", d: -25, color: "#DDF7FA" },
+  ],
+  // 건강 탭 데이터
+  weight: [], // [{date:"2025-08-15", time:"01:14 PM", kg:2.85, diff:+0.3}]
+  meds: [], // [{date,time,type,dose}]
+  walks: [], // [{date,start,end,minutes}]
 };
 
 function load() {
-  try { const raw = localStorage.getItem(KEY); if (!raw) return defaultData; const parsed = JSON.parse(raw); return { ...defaultData, ...parsed }; }
-  catch { return defaultData; }
+  try { const raw = localStorage.getItem(KEY); return raw ? JSON.parse(raw) : defaultState; } catch { return defaultState; }
 }
-function save(data) { localStorage.setItem(KEY, JSON.stringify(data)); }
+function save(s) { localStorage.setItem(KEY, JSON.stringify(s)); }
 
-const Card = ({ title, children, footer, className }) => (
-  <div className={classNames("bg-white rounded-2xl shadow p-4 mb-4", className)}>
-    <div className="mb-2">
-      <h2 className="text-lg font-semibold">{title}</h2>
-    </div>
-    <div>{children}</div>
-    {footer && <div className="pt-3 mt-3 border-t text-sm text-gray-500">{footer}</div>}
-  </div>
-);
+export default function App() {
+  const [tab, setTab] = useState("home"); // calendar | today | home | health | diary → 디자인상: calendar/today(home)/health/diary
+  const [state, setState] = useState(defaultState);
 
-const SectionTitle = ({ children }) => (
-  <h1 className="text-2xl font-bold mb-3 flex items-center gap-2">
-    {children}
-  </h1>
-);
+  useEffect(() => { setState(load()); }, []);
+  useEffect(() => { save(state); }, [state]);
 
-function isDue(history, everyDays) {
-  if (!history || history.length === 0) return true;
-  const last = new Date(history[history.length - 1]).getTime();
-  const next = last + everyDays * 24 * 60 * 60 * 1000;
-  return Date.now() >= next;
-}
-function nextDueDate(history, everyDays) {
-  if (!history || history.length === 0) return "미완료";
-  const last = new Date(history[history.length - 1]).getTime();
-  const next = new Date(last + everyDays * 24 * 60 * 60 * 1000);
-  return next.toLocaleDateString();
-}
-
-export default function BananaCareApp() {
-  const [data, setData] = useState(defaultData);
-  const [activeTab, setActiveTab] = useState("dashboard");
-
-  useEffect(() => { setData(load()); }, []);
-  useEffect(() => { save(data); }, [data]);
-
-  const dueRecurring = useMemo(() => {
-    return data.recurring.items.map((it) => ({
-      ...it, due: isDue(it.history, it.everyDays), nextDue: nextDueDate(it.history, it.everyDays),
+  // 오늘 요약 타임라인용 헬퍼
+  const addTimeline = (label, color) => {
+    setState(prev => ({
+      ...prev,
+      timeline: [
+        ...prev.timeline,
+        { time: nowTime(), label, color }
+      ]
     }));
-  }, [data.recurring.items]);
-
-  const toggleDailySupplement = (date = todayStr()) => {
-    const next = { ...data };
-    const v = !!next.dailySupplements.log[date];
-    next.dailySupplements.log[date] = !v;
-    setData(next);
+    // 캘린더 점 표시용
+    setState(prev => ({
+      ...prev,
+      calendar: {
+        ...prev.calendar,
+        [todayStr()]: Array.from(new Set([...(prev.calendar[todayStr()] || []), label]))
+      }
+    }));
   };
-  const addPrnMed = (entry) => { setData({ ...data, prnMeds: [...data.prnMeds, { id: uid(), ...entry }] }); };
-  const completeRecurring = (key) => {
-    setData({
-      ...data,
-      recurring: {
-        ...data.recurring,
-        items: data.recurring.items.map((it) => it.key === key ? { ...it, history: [...it.history, ts()] } : it),
-      },
-    });
-  };
-  const addWalk = (minutes, note = "") => {
-    setData({ ...data, walks: [...data.walks, { id: uid(), date: todayStr(), time: nowTime(), minutes: Number(minutes || 0), note }] });
-  };
-  const completeVaccine = () => { const t = ts(); setData({ ...data, vaccine: { ...data.vaccine, last: t, history: [...data.vaccine.history, t] } }); };
-  const completeHeartworm = () => { const t = ts(); setData({ ...data, heartworm: { ...data.heartworm, last: t, history: [...data.heartworm.history, t] } }); };
-  const toggleMeal = (when, date = todayStr()) => { const next = { ...data }; const cur = next.meals[when][date]; next.meals[when][date] = !cur; setData(next); };
-  const toggleSparkles = (date = todayStr()) => { const next = { ...data }; next.sparkles.log[date] = !next.sparkles.log[date]; setData(next); };
-  const addPoop = (note = "") => { setData({ ...data, poop: [...data.poop, { id: uid(), date: todayStr(), time: nowTime(), note }] }); };
-  const addScale = (date, kg) => { if (!date || !kg) return; setData({ ...data, scale: [...data.scale, { id: uid(), date, kg: Number(kg) }] }); };
-  const addKindergarten = (entry) => { setData({ ...data, kindergarten: [...data.kindergarten, { id: uid(), ...entry }] }); };
-  const deleteItem = (collection, id) => { const next = { ...data }; next[collection] = next[collection].filter((x) => x.id !== id); setData(next); };
-
-  const exportJSON = () => {
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url; a.download = `banana-care-${todayStr()}.json`; a.click(); URL.revokeObjectURL(url);
-  };
-  const importJSON = (file) => {
-    const reader = new FileReader();
-    reader.onload = () => { try { const parsed = JSON.parse(reader.result); setData({ ...defaultData, ...parsed }); } catch { alert("JSON 파싱 오류: 올바른 백업 파일이 아닙니다."); } };
-    reader.readAsText(file);
-  };
-
-  const scaleData = useMemo(() => {
-    return [...data.scale].sort((a, b) => new Date(a.date) - new Date(b.date)).map((d) => ({ date: d.date, kg: d.kg }));
-  }, [data.scale]);
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900 pb-24">
-      <header className="sticky top-0 z-10 bg-white/80 backdrop-blur border-b">
-        <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2 font-bold text-lg">
-            바나 케어 트래커
-          </div>
-          <div className="flex items-center gap-2">
-            <button onClick={exportJSON} className="px-2 py-1 text-sm rounded-xl border flex items-center gap-1">
-              내보내기
-            </button>
-            <label className="px-2 py-1 text-sm rounded-xl border flex items-center gap-1 cursor-pointer">
-              가져오기
-              <input className="hidden" type="file" accept="application/json" onChange={(e) => e.target.files?.[0] && importJSON(e.target.files[0])} />
-            </label>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-gray-50 text-gray-900 flex justify-center">
+      <div className="w-full max-w-[420px] min-h-screen flex flex-col">
+        <Header />
 
-      <main className="max-w-2xl mx-auto p-4">
-        <Tabs active={activeTab} onChange={setActiveTab} />
+        <main className="flex-1 px-6 py-4 pb-[calc(4rem+env(safe-area-inset-bottom))]">
+          {tab === "calendar" && <CalendarScreen calendar={state.calendar} />}
+          {tab === "home" && (
+            <HomeScreen
+              timeline={state.timeline}
+              routine={state.routine}
+              upcoming={state.upcoming}
+              onQuickAdd={addTimeline}
+            />
+          )}
+          {tab === "health" && (
+            <HealthScreen
+              weight={state.weight}
+              meds={state.meds}
+              walks={state.walks}
+              onAddWeight={(kg) => setState(p => ({ ...p, weight: [...p.weight, makeWeightEntry(kg)] }))}
+              onAddMed={(type, dose) => setState(p => ({ ...p, meds: [...p.meds, makeMedEntry(type, dose)] }))}
+              onAddWalk={(start, end, minutes) => setState(p => ({ ...p, walks: [...p.walks, makeWalkEntry(start, end, minutes)] }))}
+            />
+          )}
+          {tab === "diary" && (
+            <DiaryScreen routine={state.routine} onChange={(r) => setState(p => ({ ...p, routine: r }))} />
+          )}
+        </main>
 
-        {activeTab === "dashboard" && (
-          <Dashboard
-            data={data}
-            dueRecurring={dueRecurring}
-            toggleDailySupplement={toggleDailySupplement}
-            completeVaccine={completeVaccine}
-            completeHeartworm={completeHeartworm}
-            toggleMeal={toggleMeal}
-            toggleSparkles={toggleSparkles}
-          />
-        )}
-
-        {activeTab === "health" && (
-          <HealthSection
-            data={data}
-            toggleDailySupplement={toggleDailySupplement}
-            addPrnMed={addPrnMed}
-            completeRecurring={completeRecurring}
-            dueRecurring={dueRecurring}
-          />
-        )}
-
-        {activeTab === "activity" && (
-          <ActivitySection
-            walks={data.walks}
-            addWalk={addWalk}
-            poop={data.poop}
-            addPoop={addPoop}
-            meals={data.meals}
-            toggleMeal={toggleMeal}
-            sparkles={data.sparkles}
-            toggleSparkles={toggleSparkles}
-          />
-        )}
-
-        {activeTab === "school" && (
-          <KindergartenSection list={data.kindergarten} add={addKindergarten} remove={(id) => deleteItem("kindergarten", id)} />
-        )}
-
-        {activeTab === "scale" && (
-          <ScaleSection scaleData={scaleData} addScale={addScale} />
-        )}
-      </main>
-
-      <nav className="fixed bottom-0 inset-x-0 bg-white border-t">
-        <div className="max-w-2xl mx-auto grid grid-cols-4 text-sm">
-          <TabButton label="대시보드" active={activeTab === "dashboard"} onClick={() => setActiveTab("dashboard")} />
-          <TabButton label="건강/위생" active={activeTab === "health"} onClick={() => setActiveTab("health")} />
-          <TabButton label="활동" active={activeTab === "activity"} onClick={() => setActiveTab("activity")} />
-          <TabButton label="몸무게" active={activeTab === "scale"} onClick={() => setActiveTab("scale")} />
-        </div>
-      </nav>
+        <BottomNav tab={tab} onChange={setTab} />
+      </div>
     </div>
   );
 }
 
-function Tabs({ active, onChange }) {
-  const tabs = [
-    { key: "dashboard", label: "대시보드" },
-    { key: "health", label: "건강/위생" },
-    { key: "activity", label: "활동" },
-    { key: "school", label: "유치원" },
-    { key: "scale", label: "몸무게" },
-  ];
+function Header() {
   return (
-    <div className="flex gap-2 overflow-x-auto pb-1 mb-3 -mx-1 px-1">
-      {tabs.map((t) => (
-        <button
-          key={t.key}
-          onClick={() => onChange(t.key)}
-          className={classNames(
-            "px-3 py-1.5 rounded-full whitespace-nowrap border",
-            active === t.key ? "bg-black text-white border-black" : "bg-white"
+    <header className="sticky top-0 z-10 bg-white/90 backdrop-blur border-b px-6 pt-[env(safe-area-inset-top)]">
+      <div className="h-16 flex items-end">
+        <h1 className="font-bold text-2xl tracking-tight">Banana Care</h1>
+      </div>
+    </header>
+  );
+}
+
+function BottomNav({ tab, onChange }) {
+  const Item = ({ id, label }) => (
+    <button
+      onClick={() => onChange(id)}
+      className={`flex flex-col items-center justify-center ${tab === id ? "text-blue-700 font-semibold" : "text-gray-600"}`}
+    >
+      <span className="text-sm">{label}</span>
+    </button>
+  );
+  return (
+    <nav className="fixed bottom-0 left-0 right-0 flex justify-center">
+      <div className="w-full max-w-[420px] border-t bg-white px-6 pb-[env(safe-area-inset-bottom)]">
+        <div className="h-14 grid grid-cols-4">
+          <Item id="calendar" label="캘린더" />
+          <Item id="today" label="오늘" />
+          <Item id="home" label="홈" />
+          <Item id="health" label="건강" />
+          {/* 디자인엔 다이어리 탭도 있어 보였으므로 필요 시 교체 */}
+          {/* <Item id="diary" label="다이어리" /> */}
+        </div>
+      </div>
+    </nav>
+  );
+}
+
+/***************************
+ * 캘린더 화면
+ ***************************/
+function CalendarScreen({ calendar }) {
+  // 단순한 월 달력(현재 월)
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth(); // 0-based
+  const first = new Date(year, month, 1);
+  const startDay = first.getDay(); // 0(Sun)-6(Sat)
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  const cells = [];
+  for (let i = 0; i < startDay; i++) cells.push(null);
+  for (let d = 1; d <= daysInMonth; d++) cells.push(d);
+
+  const colorPool = ["#E6F4EA", "#FDF0D5", "#F7FBE7", "#FCE4EC", "#E7F0FF"]; // 연한 점들
+
+  return (
+    <section aria-labelledby="cal-title">
+      <h2 id="cal-title" className="sr-only">캘린더</h2>
+      <div className="text-lg font-semibold mb-3">{year}년 {month + 1}월</div>
+      <div className="grid grid-cols-7 gap-2 text-center text-sm text-gray-500 mb-2">
+        {"일월화수목금토".split("").map((d) => <div key={d}>{d}</div>)}
+      </div>
+      <div className="grid grid-cols-7 gap-2">
+        {cells.map((d, i) => {
+          const dateStr = d ? new Date(year, month, d).toISOString().slice(0, 10) : "";
+          const dots = calendar[dateStr] || [];
+          return (
+            <div key={i} className="h-16 rounded-xl bg-white border flex flex-col items-center p-1 justify-between">
+              <div className={`text-sm ${[0,6].includes((i)%7)?"text-red-500":""}`}>{d || ""}</div>
+              <div className="flex gap-1 pb-1">
+                {dots.slice(0,5).map((_, idx) => (
+                  <span key={idx} className="w-3 h-3 rounded-full" style={{ backgroundColor: colorPool[idx%colorPool.length] }} />
+                ))}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+/***************************
+ * 홈(오늘) 화면
+ ***************************/
+function HomeScreen({ timeline, routine, upcoming, onQuickAdd }) {
+  return (
+    <div className="space-y-6">
+      {/* 오늘 요약 */}
+      <Card>
+        <div className="flex items-center justify-between mb-3">
+          <div className="font-semibold">오늘 요약</div>
+          <div className="text-sm text-gray-500">{todayStr()}</div>
+        </div>
+        <div className="rounded-xl bg-white">
+          {timeline.length === 0 ? (
+            <div className="text-sm text-gray-400">아직 기록이 없어요</div>
+          ) : (
+            <ul className="space-y-2">
+              {timeline.slice().reverse().map((t, idx) => (
+                <li key={idx} className="flex items-center gap-3">
+                  <span className="w-3 h-3 rounded-full" style={{ backgroundColor: t.color || "#E6F4EA" }} />
+                  <span className="text-sm text-gray-500 w-20">{t.time}</span>
+                  <span className="text-sm">{t.label}</span>
+                </li>
+              ))}
+            </ul>
           )}
-        >
-          {t.label}
+        </div>
+      </Card>
+
+      {/* 데일리루틴 */}
+      <section>
+        <h3 className="font-semibold text-lg mb-2">데일리루틴</h3>
+        <div className="text-sm text-gray-500 mb-1">오전</div>
+        <ChipRow labels={routine.am} onAdd={(l)=>onQuickAdd(l, "#E6F4EA")} />
+        <div className="text-sm text-gray-500 mt-3 mb-1">오후</div>
+        <ChipRow labels={routine.pm} onAdd={(l)=>onQuickAdd(l, "#E7F0FF")} />
+        <h4 className="font-semibold text-lg mt-5 mb-2">정기루틴</h4>
+        <ChipRow labels={routine.reg} onAdd={(l)=>onQuickAdd(l, "#FDF0D5")} />
+      </section>
+
+      {/* 다가오는 일정 */}
+      <Card>
+        <div className="font-semibold mb-2">다가오는 일정</div>
+        {upcoming.length === 0 ? (
+          <div className="text-sm text-gray-400">예정 없음</div>
+        ) : (
+          <ul className="space-y-2 text-sm">
+            {upcoming.map((u, i) => (
+              <li key={i} className="flex items-center gap-3">
+                <span className="w-3 h-3 rounded-full" style={{ backgroundColor: u.color }} />
+                <span className="text-gray-500">D{u.d}</span>
+                <span className="">{u.label}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Card>
+    </div>
+  );
+}
+
+function ChipRow({ labels, onAdd }) {
+  return (
+    <div className="flex flex-wrap gap-3">
+      {labels.map((label) => (
+        <button key={label} onClick={()=>onAdd(label)} className="min-w-[92px] h-12 rounded-2xl border px-4 bg-white">
+          {label}
         </button>
       ))}
+      <div className="min-w-[92px] h-12 rounded-2xl border border-dashed grid place-items-center text-gray-400">+</div>
     </div>
   );
 }
 
-const TabButton = ({ label, active, onClick }) => (
-  <button onClick={onClick} className={classNames("flex flex-col items-center py-2", active ? "text-black" : "text-gray-500") }>
-    <span className="text-[11px]">{label}</span>
-  </button>
-);
-
-function Dashboard({ data, dueRecurring, toggleDailySupplement, completeVaccine, completeHeartworm, toggleMeal, toggleSparkles }) {
+/***************************
+ * 건강 화면 (몸무게 / 투약 / 산책 탭)
+ ***************************/
+function HealthScreen({ weight, meds, walks, onAddWeight, onAddMed, onAddWalk }) {
+  const [sub, setSub] = useState("weight");
   return (
     <div>
-      <SectionTitle>오늘 체크</SectionTitle>
-      <div className="grid grid-cols-2 gap-3">
-        <QuickCheck
-          title="영양제"
-          done={!!data.dailySupplements.log[todayStr()]}
-          onClick={() => toggleDailySupplement()}
-        />
-        <QuickCheck
-          title="아침 밥"
-          done={!!data.meals.AM[todayStr()]}
-          onClick={() => toggleMeal("AM")}
-        />
-        <QuickCheck
-          title="저녁 밥"
-          done={!!data.meals.PM[todayStr()]}
-          onClick={() => toggleMeal("PM")}
-        />
-        <QuickCheck
-          title="양치"
-          done={!!data.sparkles.log[todayStr()]}
-          onClick={() => toggleSparkles()}
-        />
+      <div className="flex gap-3 mb-4">
+        {[
+          {id:"weight", label:"몸무게"},
+          {id:"med", label:"투약 기록"},
+          {id:"walk", label:"산책 기록"},
+        ].map(t => (
+          <button key={t.id} onClick={()=>setSub(t.id)} className={`px-4 h-10 rounded-full border ${sub===t.id?"bg-black text-white":"bg-white"}`}>{t.label}</button>
+        ))}
       </div>
 
-      <Card title="주기 관리">
-        <ul className="divide-y">
-          {dueRecurring.map((it) => (
-            <li key={it.key} className="flex items-center justify-between py-2">
-              <div>
-                <div className="font-medium">{it.name}</div>
-                <div className="text-xs text-gray-500">다음 예정: {it.nextDue}</div>
-              </div>
-              <button
-                onClick={() => completeRecurring(it.key)}
-                className={classNames(
-                  "px-3 py-1.5 rounded-xl border text-sm",
-                  it.due ? "bg-black text-white border-black" : "bg-gray-100 text-gray-500"
-                )}
-              >
-                {it.due ? "오늘 하기" : "완료 기록"}
-              </button>
-            </li>
-          ))}
-        </ul>
-      </Card>
-
-      <div className="grid grid-cols-2 gap-3">
-        <Card title="예방접종">
-          <button onClick={completeVaccine} className="w-full px-3 py-2 rounded-xl border">완료 기록</button>
-          <HistoryList items={data.vaccine.history} empty="기록 없음" />
-        </Card>
-        <Card title="심장사상충">
-          <button onClick={completeHeartworm} className="w-full px-3 py-2 rounded-xl border">완료 기록</button>
-          <HistoryList items={data.heartworm.history} empty="기록 없음" />
-        </Card>
-      </div>
+      {sub === "weight" && <WeightTab list={weight} onAdd={onAddWeight} />}
+      {sub === "med" && <MedTab list={meds} onAdd={onAddMed} />}
+      {sub === "walk" && <WalkTab list={walks} onAdd={onAddWalk} />}
     </div>
   );
 }
 
-function HealthSection({ data, toggleDailySupplement, addPrnMed, completeRecurring, dueRecurring }) {
-  const [dose, setDose] = useState("");
-  const [note, setNote] = useState("");
-
-  return (
-    <div>
-      <Card title="매일 영양제">
-        <div className="flex items-center gap-2 mb-2">
-          <button onClick={() => toggleDailySupplement()} className="px-3 py-2 rounded-xl border flex items-center gap-2">
-            오늘 복용
-          </button>
-          <span className="px-2 py-0.5 text-xs rounded-full bg-emerald-100 text-emerald-700">{todayStr()}</span>
-        </div>
-        <HistoryToggleMap map={data.dailySupplements.log} />
-      </Card>
-
-      <Card title="증상 시 복용(용량 기록)">
-        <div className="flex gap-2 mb-2">
-          <input className="flex-1 px-3 py-2 rounded-xl border" placeholder="용량(ex. 5mg/1정)" value={dose} onChange={(e) => setDose(e.target.value)} />
-          <button
-            onClick={() => { if (!dose) return alert("용량을 입력하세요"); addPrnMed({ date: todayStr(), time: nowTime(), dose, note }); setDose(""); setNote(""); }}
-            className="px-3 py-2 rounded-xl border"
-          >
-            기록
-          </button>
-        </div>
-        <input className="w-full px-3 py-2 rounded-xl border mb-2" placeholder="메모(증상, 약 이름 등)" value={note} onChange={(e) => setNote(e.target.value)} />
-        <ListTable
-          cols={["날짜", "시간", "용량", "메모"]}
-          rows={data.prnMeds.slice().reverse().map((m) => [m.date, m.time, m.dose, m.note || "-"])}
-          empty="기록 없음"
-        />
-      </Card>
-
-      <Card title="주기적 관리">
-        <ul className="divide-y">
-          {dueRecurring.map((it) => (
-            <li key={it.key} className="flex items-center justify-between py-2">
-              <div>
-                <div className="font-medium">{it.name}</div>
-                <div className="text-xs text-gray-500">다음 예정: {it.nextDue}</div>
-              </div>
-              <button onClick={() => completeRecurring(it.key)} className="px-3 py-1.5 rounded-xl border">완료 기록</button>
-            </li>
-          ))}
-        </ul>
-        <div className="mt-3">
-          <h3 className="text-sm font-medium mb-1">최근 이력</h3>
-          <ListTable
-            cols={["항목", "완료시각"]}
-            rows={data.recurring.items
-              .flatMap((it) => it.history.map((h) => ({ name: it.name, time: h })))
-              .sort((a, b) => new Date(b.time) - new Date(a.time))
-              .slice(0, 10)
-              .map((r) => [r.name, fmtDate(r.time)])}
-            empty="기록 없음"
-          />
-        </div>
-      </Card>
-
-      <div className="grid grid-cols-2 gap-3">
-        <Card title="예방접종(연 1회)">
-          <HistoryList items={data.vaccine.history} empty="기록 없음" />
-        </Card>
-        <Card title="심장사상충(월 1회)">
-          <HistoryList items={data.heartworm.history} empty="기록 없음" />
-        </Card>
-      </div>
-    </div>
-  );
-}
-
-function ActivitySection({ walks, addWalk, poop, addPoop, meals, toggleMeal, sparkles, toggleSparkles }) {
-  const [walkMin, setWalkMin] = useState("");
-  const [walkNote, setWalkNote] = useState("");
-  const [poopNote, setPoopNote] = useState("");
-
-  return (
-    <div>
-      <Card title="산책">
-        <div className="flex gap-2 mb-2">
-          <input className="w-28 px-3 py-2 rounded-xl border" placeholder="분" inputMode="numeric" value={walkMin} onChange={(e) => setWalkMin(e.target.value)} />
-          <input className="flex-1 px-3 py-2 rounded-xl border" placeholder="메모(코스/컨디션)" value={walkNote} onChange={(e) => setWalkNote(e.target.value)} />
-          <button onClick={() => { addWalk(walkMin || 0, walkNote); setWalkMin(""); setWalkNote(""); }} className="px-3 py-2 rounded-xl border flex items-center gap-1">
-            추가
-          </button>
-        </div>
-        <ListTable
-          cols={["날짜", "시간", "분", "메모"]}
-          rows={walks.slice().reverse().map((w) => [w.date, w.time, w.minutes, w.note || "-"])}
-          empty="기록 없음"
-        />
-      </Card>
-
-      <div className="grid grid-cols-2 gap-3">
-        <Card title="식사">
-          <div className="flex gap-2 mb-2">
-            <button onClick={() => toggleMeal("AM")} className="flex-1 px-3 py-2 rounded-xl border">아침 먹음</button>
-            <button onClick={() => toggleMeal("PM")} className="flex-1 px-3 py-2 rounded-xl border">저녁 먹음</button>
-          </div>
-          <HistoryToggleMap map={meals.AM} label="아침" />
-          <HistoryToggleMap map={meals.PM} label="저녁" />
-        </Card>
-
-        <Card title="양치">
-          <button onClick={() => toggleSparkles()} className="w-full px-3 py-2 rounded-xl border mb-2">오늘 양치</button>
-          <HistoryToggleMap map={sparkles.log} />
-        </Card>
-      </div>
-
-      <Card title="배변">
-        <div className="flex gap-2 mb-2">
-          <input className="flex-1 px-3 py-2 rounded-xl border" placeholder="메모(상태 등)" value={poopNote} onChange={(e) => setPoopNote(e.target.value)} />
-          <button onClick={() => { addPoop(poopNote); setPoopNote(""); }} className="px-3 py-2 rounded-xl border flex items-center gap-1">
-            기록
-          </button>
-        </div>
-        <ListTable
-          cols={["날짜", "시간", "메모"]}
-          rows={poop.slice().reverse().map((p) => [p.date, p.time, p.note || "-"])}
-          empty="기록 없음"
-        />
-      </Card>
-    </div>
-  );
-}
-
-function KindergartenSection({ list, add, remove }) {
-  const [note, setNote] = useState("");
-  const [photos, setPhotos] = useState([]);
-
-  const onPickPhoto = (files) => {
-    const arr = Array.from(files || []);
-    const readers = arr.map((f) => new Promise((res) => {
-      const r = new FileReader();
-      r.onload = () => res(r.result);
-      r.readAsDataURL(f);
-    }));
-    Promise.all(readers).then((imgs) => setPhotos((prev) => [...prev, ...imgs]));
-  };
-
-  const addEntry = () => {
-    add({ date: todayStr(), note, photos });
-    setNote(""); setPhotos([]);
-  };
-
-  return (
-    <div>
-      <Card title="유치원"
-        footer={<span className="text-xs">사진은 이 기기 로컬 저장소에만 보관됩니다(백업 시 JSON에 포함되지 않음).</span>}>
-        <textarea className="w-full px-3 py-2 rounded-xl border mb-2" placeholder="오늘 한 일(간단 메모)" value={note} onChange={(e) => setNote(e.target.value)} />
-        <div className="flex items-center gap-2 mb-2">
-          <label className="px-3 py-2 rounded-xl border cursor-pointer">
-            사진 추가
-            <input className="hidden" type="file" accept="image/*" multiple onChange={(e) => onPickPhoto(e.target.files)} />
-          </label>
-          <button onClick={addEntry} className="px-3 py-2 rounded-xl border">저장</button>
-        </div>
-        {photos.length > 0 && (
-          <div className="grid grid-cols-4 gap-2 mb-3">
-            {photos.map((src, i) => (<img key={i} src={src} alt="preview" className="w-full h-20 object-cover rounded-xl" />))}
-          </div>
-        )}
-        <ul className="divide-y">
-          {list.slice().reverse().map((e) => (
-            <li key={e.id} className="py-2">
-              <div className="flex items-center justify-between">
-                <div className="font-medium">{e.date}</div>
-                <button onClick={() => remove(e.id)} className="px-2 py-1 rounded-xl border text-xs flex items-center gap-1"><Trash2 className="w-4 h-4" /> 삭제</button>
-              </div>
-              {e.note && <div className="text-sm text-gray-700 mt-1">{e.note}</div>}
-              {e.photos?.length > 0 && (
-                <div className="grid grid-cols-4 gap-2 mt-2">
-                  {e.photos.map((src, i) => (<img key={i} src={src} alt="photo" className="w-full h-20 object-cover rounded-xl" />))}
-                </div>
-              )}
-            </li>
-          ))}
-        </ul>
-      </Card>
-    </div>
-  );
-}
-
-function ScaleSection({ scaleData, addScale }) {
-  const [date, setDate] = useState(todayStr());
+function WeightTab({ list, onAdd }) {
   const [kg, setKg] = useState("");
-
+  const data = useMemo(()=> list.map(i=>({ date:i.date, kg:i.kg })),[list]);
   return (
-    <div>
-              <Card title="몸무게 기록">
-          <div className="flex items-center gap-2 mb-4">
-            <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="px-3 py-2 rounded-xl border" />
-            <input type="number" step="0.01" placeholder="kg" value={kg} onChange={(e) => setKg(e.target.value)} className="px-3 py-2 rounded-xl border w-28" />
-            <button onClick={() => { addScale(date, kg); setKg(""); }} className="px-3 py-2 rounded-xl border">추가</button>
+    <div className="space-y-6">
+      <Card className="bg-blue-50"> 
+        <div className="font-medium mb-2">몸무게 입력</div>
+        <div className="flex gap-2">
+          <input type="number" step="0.01" placeholder="kg" value={kg} onChange={(e)=>setKg(e.target.value)} className="px-3 py-2 rounded-xl border w-28" />
+          <button onClick={()=>{ if(!kg) return; onAdd(parseFloat(kg)); setKg(""); }} className="px-3 py-2 rounded-xl border">추가</button>
         </div>
-        <div className="h-64 w-full">
+      </Card>
+      <section>
+        <div className="font-semibold mb-2">그래프 보기</div>
+        <div className="h-56 w-full bg-white rounded-2xl border">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={scaleData} margin={{ left: 8, right: 8, top: 8, bottom: 8 }}>
+            <LineChart data={data} margin={{ left: 8, right: 8, top: 8, bottom: 8 }}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="date" tick={{ fontSize: 12 }} />
-              <YAxis tick={{ fontSize: 12 }} domain={["auto", "auto"]} />
+              <YAxis tick={{ fontSize: 12 }} domain={["auto","auto"]} />
               <Tooltip />
-              <Line type="monotone" dataKey="kg" dot={true} />
+              <Line type="monotone" dataKey="kg" dot />
             </LineChart>
           </ResponsiveContainer>
         </div>
-      </Card>
+      </section>
+      <section>
+        <div className="font-semibold mb-2">리스트 보기</div>
+        <Table cols={["날짜","시간","몸무게","변화량"]} rows={list.slice().reverse().map(w=>[w.date,w.time,`${w.kg} kg`, w.diff>0?`+ ${w.diff} kg`: `${w.diff||0} kg`])} />
+      </section>
     </div>
   );
 }
 
-const QuickCheck = ({ title, done, onClick }) => (
-  <button onClick={onClick} className={classNames("p-3 rounded-2xl border text-left", done ? "bg-emerald-50 border-emerald-300" : "bg-white") }>
-    <div className="flex items-center gap-2">
-      <div className="font-medium">{title}</div>
-    </div>
-    <div className="text-xs text-gray-500 mt-1">{todayStr()} {done ? "완료" : "미완료"}</div>
-  </button>
-);
-
-const HistoryList = ({ items = [], empty = "기록 없음" }) => (
-  <div className="mt-2 max-h-40 overflow-auto text-sm">
-    {(!items || items.length === 0) && <div className="text-gray-400">{empty}</div>}
-    <ul className="space-y-1">
-      {items.slice().reverse().map((d, i) => (<li key={i}>{fmtDate(d)}</li>))}
-    </ul>
-  </div>
-);
-
-const HistoryToggleMap = ({ map = {}, label }) => {
-  const entries = Object.entries(map).sort((a, b) => (a[0] < b[0] ? 1 : -1));
+function MedTab({ list, onAdd }) {
+  const [type, setType] = useState("슬개골약");
+  const [dose, setDose] = useState("1알");
   return (
-    <div className="mt-2 max-h-40 overflow-auto text-sm">
-      {entries.length === 0 && <div className="text-gray-400">기록 없음</div>}
-      {entries.length > 0 && (
-        <table className="w-full text-left text-sm">
-          <thead>
-            <tr className="text-gray-500">
-              <th className="py-1">날짜</th>
-              <th className="py-1">상태{label ? `(${label})` : ""}</th>
-            </tr>
+    <div className="space-y-6">
+      <Card className="bg-blue-50">
+        <div className="font-medium mb-2">투약 기록 입력</div>
+        <div className="flex gap-2 items-center">
+          <input value={type} onChange={(e)=>setType(e.target.value)} className="px-3 py-2 rounded-xl border" />
+          <input value={dose} onChange={(e)=>setDose(e.target.value)} className="px-3 py-2 rounded-xl border w-24" />
+          <button onClick={()=>onAdd(type, dose)} className="px-3 py-2 rounded-xl border">추가</button>
+        </div>
+        <div className="mt-3 flex items-center gap-2">
+          <span className="px-4 h-10 rounded-2xl border bg-white grid place-items-center">슬개골약</span>
+          <span className="px-4 h-10 rounded-2xl border border-dashed text-gray-400 grid place-items-center">+</span>
+        </div>
+      </Card>
+      <section>
+        <div className="font-semibold mb-2">리스트 보기</div>
+        <Table cols={["날짜","시간","약 종류","용량"]} rows={list.slice().reverse().map(m=>[m.date,m.time,m.type,m.dose])} />
+      </section>
+    </div>
+  );
+}
+
+function WalkTab({ list, onAdd }) {
+  const [start, setStart] = useState("07:00");
+  const [end, setEnd] = useState("08:00");
+  const [minutes, setMinutes] = useState(60);
+  return (
+    <div className="space-y-6">
+      <Card className="bg-blue-50">
+        <div className="font-medium mb-2">산책 기록 입력</div>
+        <div className="flex flex-wrap gap-2 items-center">
+          <input type="time" value={start} onChange={(e)=>setStart(e.target.value)} className="px-3 py-2 rounded-xl border" />
+          <input type="time" value={end} onChange={(e)=>setEnd(e.target.value)} className="px-3 py-2 rounded-xl border" />
+          <input type="number" value={minutes} onChange={(e)=>setMinutes(parseInt(e.target.value||"0"))} className="px-3 py-2 rounded-xl border w-24" />
+          <button onClick={()=>onAdd(start,end,minutes)} className="px-3 py-2 rounded-xl border">추가</button>
+        </div>
+      </Card>
+      <section>
+        <div className="font-semibold mb-2">그래프 보기</div>
+        <Table cols={["날짜","시작시간","종료시간","분"]} rows={list.slice().reverse().map(w=>[w.date,w.start,w.end,w.minutes])} />
+      </section>
+    </div>
+  );
+}
+
+/***************************
+ * 다이어리(카테고리 설정) 화면
+ ***************************/
+function DiaryScreen({ routine, onChange }) {
+  const update = (where, label) => {
+    onChange({ ...routine, [where]: Array.from(new Set([...(routine[where]||[]), label])) });
+  };
+  const Row = ({ title, list, where }) => (
+    <div className="mb-6">
+      <div className="text-sm text-gray-600 mb-2">{title}</div>
+      <div className="flex flex-wrap gap-3">
+        {list.map((l) => (
+          <span key={l} className="min-w-[92px] h-12 rounded-2xl border bg-white grid place-items-center px-4">{l}</span>
+        ))}
+        <button onClick={()=>update(where, "새 항목")} className="min-w-[92px] h-12 rounded-2xl border border-dashed text-gray-400">+</button>
+      </div>
+    </div>
+  );
+
+  return (
+    <section>
+      <div className="font-semibold text-xl mb-4">카테고리 설정</div>
+      <div className="font-semibold text-lg mb-2">데일리루틴</div>
+      <Row title="오전" list={routine.am} where="am" />
+      <Row title="오후" list={routine.pm} where="pm" />
+      <div className="font-semibold text-lg mt-2 mb-2">정기루틴</div>
+      <Row title="" list={routine.reg} where="reg" />
+    </section>
+  );
+}
+
+/***************************
+ * 공용 UI
+ ***************************/
+function Card({ children, className="" }) {
+  return (
+    <div className={`bg-white rounded-2xl border p-4 ${className}`}>{children}</div>
+  );
+}
+
+function Table({ cols = [], rows = [] }) {
+  return (
+    <div className="bg-white rounded-2xl border p-3">
+      {rows.length === 0 ? (
+        <div className="text-sm text-gray-400">기록 없음</div>
+      ) : (
+        <table className="w-full text-sm">
+          <thead className="text-gray-500">
+            <tr>{cols.map((c) => <th key={c} className="text-left py-1 pr-2">{c}</th>)}</tr>
           </thead>
           <tbody>
-            {entries.map(([d, v]) => (
-              <tr key={d} className="border-t">
-                <td className="py-1">{d}</td>
-                <td className="py-1">{v ? "완료" : "-"}</td>
+            {rows.map((r, i) => (
+              <tr key={i} className="border-t">
+                {r.map((cell, j) => <td key={j} className="py-1 pr-2 align-top">{String(cell)}</td>)}
               </tr>
             ))}
           </tbody>
@@ -571,27 +428,20 @@ const HistoryToggleMap = ({ map = {}, label }) => {
       )}
     </div>
   );
-};
+}
 
-const ListTable = ({ cols = [], rows = [], empty = "기록 없음" }) => (
-  <div className="max-h-64 overflow-auto text-sm">
-    {rows.length === 0 ? (
-      <div className="text-gray-400">{empty}</div>
-    ) : (
-      <table className="w-full text-left">
-        <thead className="text-gray-500 text-xs">
-          <tr>
-            {cols.map((c) => (<th key={c} className="py-1 pr-2">{c}</th>))}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((r, idx) => (
-            <tr key={idx} className="border-t">
-              {r.map((cell, i) => (<td key={i} className="py-1 pr-2 align-top">{String(cell)}</td>))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    )}
-  </div>
-);
+/***************************
+ * 엔트리 생성기
+ ***************************/
+function makeWeightEntry(kg) {
+  const prev = load().weight.slice(-1)[0];
+  const lastKg = prev?.kg || 0;
+  const diff = lastKg ? +(kg - lastKg).toFixed(1) : 0;
+  return { date: todayStr(), time: nowTime(), kg: +kg, diff };
+}
+function makeMedEntry(type, dose) {
+  return { date: todayStr(), time: nowTime(), type, dose };
+}
+function makeWalkEntry(start, end, minutes) {
+  return { date: todayStr(), start, end, minutes: +minutes };
+}
