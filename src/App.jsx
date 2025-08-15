@@ -271,7 +271,7 @@ function BottomNav({ tab, onChange }) {
       onClick={() => onChange(id)}
       className={`flex flex-col items-center justify-center ${tab === id ? "text-blue-700 font-semibold" : "text-gray-600"}`}
     >
-      {id === "home" && <img src="/image/home.png" alt="홈" className="w-5 h-5" />}
+      {id === "home" && <img src="/src/assets/home.png" alt="홈" className="w-5 h-5" />}
       {id !== "home" && <span className="text-sm">{label}</span>}
     </button>
   );
@@ -398,7 +398,7 @@ function CalendarScreen({ calendar, routine, timeline = [], onDeleteByDate }) {
                 {editMode ? (
                   <span className="text-xs font-medium">완료</span>
                 ) : (
-                  <img src="/image/edit.png" alt="편집" className="w-4 h-4" />
+                  <img src="/src/assets/edit.png" alt="편집" className="w-4 h-4" />
                 )}
               </button>
             </div>
@@ -522,7 +522,7 @@ function HomeScreen({ timeline, routine, upcoming, onQuickAdd, onApplyTimeline }
             {editMode ? (
               <span className="text-xs font-medium">완료</span>
             ) : (
-              <img src="/image/edit.png" alt="편집" className="w-4 h-4" />
+              <img src="/src/assets/edit.png" alt="편집" className="w-4 h-4" />
             )}
           </button>
         </div>
@@ -703,7 +703,7 @@ function WeightTab({ list, onAdd }) {
             {editMode ? (
               <span className="text-xs font-medium">완료</span>
             ) : (
-              <img src="/image/edit.png" alt="편집" className="w-4 h-4" />
+              <img src="/src/assets/edit.png" alt="편집" className="w-4 h-4" />
             )}
           </button>
         </div>
@@ -732,7 +732,7 @@ function WeightTab({ list, onAdd }) {
             {editMode ? (
               <span className="text-xs font-medium">완료</span>
             ) : (
-              <img src="/image/edit.png" alt="편집" className="w-4 h-4" />
+              <img src="/src/assets/edit.png" alt="편집" className="w-4 h-4" />
             )}
           </button>
         </div>
@@ -871,7 +871,7 @@ function MedTab({ list, onAdd }) {
             {editMode ? (
               <span className="text-xs font-medium">완료</span>
             ) : (
-              <img src="/image/edit.png" alt="편집" className="w-4 h-4" />
+              <img src="/src/assets/edit.png" alt="편집" className="w-4 h-4" />
             )}
           </button>
         </div>
@@ -989,7 +989,7 @@ function WalkTab({ list, onAdd }) {
             {editMode ? (
               <span className="text-xs font-medium">완료</span>
             ) : (
-              <img src="/image/edit.png" alt="편집" className="w-4 h-4" />
+              <img src="/src/assets/edit.png" alt="편집" className="w-4 h-4" />
             )}
           </button>
         </div>
@@ -1126,7 +1126,7 @@ function DiaryScreen() {
             {editMode ? (
               <span className="text-xs font-medium">완료</span>
             ) : (
-              <img src="/image/edit.png" alt="편집" className="w-4 h-4" />
+              <img src="/src/assets/edit.png" alt="편집" className="w-4 h-4" />
             )}
           </button>
         </div>
@@ -1330,7 +1330,7 @@ function SettingsScreen({ routine, onChange }) {
                   className="w-6 h-6 flex items-center justify-center"
                   title="삭제"
                 >
-                  <img src="/image/delete.png" alt="삭제" className="w-4 h-4" />
+                  <img src="/src/assets/delete.png" alt="삭제" className="w-4 h-4" />
                 </button>
               )}
             </button>
@@ -1365,7 +1365,7 @@ function SettingsScreen({ routine, onChange }) {
           {editMode ? (
             <span className="text-xs font-medium">완료</span>
           ) : (
-            <img src="/image/edit.png" alt="편집" className="w-4 h-4" />
+            <img src="/src/assets/edit.png" alt="편집" className="w-4 h-4" />
           )}
         </button>
       </div>
