@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
-import { CalendarDays, Check, Plus, Trash2, Upload, Download, Dog, Activity, Syringe, Pill, Bath, Footprints, Baby, School, Tooth, Soup, Weight } from "lucide-react";
+import { CalendarDays, Check, Plus, Trash2, Upload, Download, Dog, Activity, Syringe, Pill, Bath, Footprints, Baby, School, Sparkles, Soup, Weight } from "lucide-react";
 
 /**
  * Banana Care Tracker – Mobile-first React (Vite) app
@@ -11,7 +11,7 @@ import { CalendarDays, Check, Plus, Trash2, Upload, Download, Dog, Activity, Syr
  * - Walks (date + duration)
  * - Kindergarten attendance with photos & notes
  * - Meals (AM/PM) quick log
- * - Tooth brushing quick log
+ * - Sparkles brushing quick log
  * - Poop log (multi/day)
  * - Weight log with line chart
  * - JSON import/export (backup)
@@ -47,7 +47,7 @@ const defaultData = {
   heartworm: { name: "심장사상충(월 1회)", last: null, history: [] },
   kindergarten: [],
   meals: { AM: {}, PM: {} },
-  tooth: { log: {} },
+  sparkles: { log: {} },
   poop: [],
   weight: [],
 };
@@ -123,7 +123,7 @@ export default function BananaCareApp() {
   const completeVaccine = () => { const t = ts(); setData({ ...data, vaccine: { ...data.vaccine, last: t, history: [...data.vaccine.history, t] } }); };
   const completeHeartworm = () => { const t = ts(); setData({ ...data, heartworm: { ...data.heartworm, last: t, history: [...data.heartworm.history, t] } }); };
   const toggleMeal = (when, date = todayStr()) => { const next = { ...data }; const cur = next.meals[when][date]; next.meals[when][date] = !cur; setData(next); };
-  const toggleTooth = (date = todayStr()) => { const next = { ...data }; next.tooth.log[date] = !next.tooth.log[date]; setData(next); };
+  const toggleSparkles = (date = todayStr()) => { const next = { ...data }; next.sparkles.log[date] = !next.sparkles.log[date]; setData(next); };
   const addPoop = (note = "") => { setData({ ...data, poop: [...data.poop, { id: uid(), date: todayStr(), time: nowTime(), note }] }); };
   const addWeight = (date, kg) => { if (!date || !kg) return; setData({ ...data, weight: [...data.weight, { id: uid(), date, kg: Number(kg) }] }); };
   const addKindergarten = (entry) => { setData({ ...data, kindergarten: [...data.kindergarten, { id: uid(), ...entry }] }); };
@@ -175,7 +175,7 @@ export default function BananaCareApp() {
             completeVaccine={completeVaccine}
             completeHeartworm={completeHeartworm}
             toggleMeal={toggleMeal}
-            toggleTooth={toggleTooth}
+            toggleSparkles={toggleSparkles}
           />
         )}
 
@@ -197,8 +197,8 @@ export default function BananaCareApp() {
             addPoop={addPoop}
             meals={data.meals}
             toggleMeal={toggleMeal}
-            tooth={data.tooth}
-            toggleTooth={toggleTooth}
+            sparkles={data.sparkles}
+            toggleSparkles={toggleSparkles}
           />
         )}
 
@@ -256,7 +256,7 @@ const TabButton = ({ icon, label, active, onClick }) => (
   </button>
 );
 
-function Dashboard({ data, dueRecurring, toggleDailySupplement, completeVaccine, completeHeartworm, toggleMeal, toggleTooth }) {
+function Dashboard({ data, dueRecurring, toggleDailySupplement, completeVaccine, completeHeartworm, toggleMeal, toggleSparkles }) {
   return (
     <div>
       <SectionTitle>오늘 체크</SectionTitle>
@@ -281,9 +281,9 @@ function Dashboard({ data, dueRecurring, toggleDailySupplement, completeVaccine,
         />
         <QuickCheck
           title="양치"
-          icon={<Tooth className="w-5 h-5" />}
-          done={!!data.tooth.log[todayStr()]}
-          onClick={() => toggleTooth()}
+          icon={<Sparkles className="w-5 h-5" />}
+          done={!!data.sparkles.log[todayStr()]}
+          onClick={() => toggleSparkles()}
         />
       </div>
 
@@ -395,7 +395,7 @@ function HealthSection({ data, toggleDailySupplement, addPrnMed, completeRecurri
   );
 }
 
-function ActivitySection({ walks, addWalk, poop, addPoop, meals, toggleMeal, tooth, toggleTooth }) {
+function ActivitySection({ walks, addWalk, poop, addPoop, meals, toggleMeal, sparkles, toggleSparkles }) {
   const [walkMin, setWalkMin] = useState("");
   const [walkNote, setWalkNote] = useState("");
   const [poopNote, setPoopNote] = useState("");
@@ -427,9 +427,9 @@ function ActivitySection({ walks, addWalk, poop, addPoop, meals, toggleMeal, too
           <HistoryToggleMap map={meals.PM} label="저녁" />
         </Card>
 
-        <Card title="양치" icon={<Tooth className="w-5 h-5" />}>
-          <button onClick={() => toggleTooth()} className="w-full px-3 py-2 rounded-xl border mb-2">오늘 양치</button>
-          <HistoryToggleMap map={tooth.log} />
+        <Card title="양치" icon={<Sparkles className="w-5 h-5" />}>
+          <button onClick={() => toggleSparkles()} className="w-full px-3 py-2 rounded-xl border mb-2">오늘 양치</button>
+          <HistoryToggleMap map={sparkles.log} />
         </Card>
       </div>
 
