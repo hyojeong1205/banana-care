@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
-import { CalendarDays, Check, Plus, Trash2, Upload, Download, Dog, Activity, Syringe, Pill, Bath, Footprints, Baby, School, Sparkles, Soup, Weight } from "lucide-react";
-
+import { CalendarDays, Check, Plus, Trash2, Upload, Download, Dog, Activity, Syringe, Pill, Bath, Footprints, Baby, School, Sparkles, Utensils, Scale } from "lucide-react";
 /**
  * Banana Care Tracker – Mobile-first React (Vite) app
  * - LocalStorage persistence
@@ -13,7 +12,7 @@ import { CalendarDays, Check, Plus, Trash2, Upload, Download, Dog, Activity, Syr
  * - Meals (AM/PM) quick log
  * - Sparkles brushing quick log
  * - Poop log (multi/day)
- * - Weight log with line chart
+ * - Scale log with line chart
  * - JSON import/export (backup)
  */
 
@@ -49,7 +48,7 @@ const defaultData = {
   meals: { AM: {}, PM: {} },
   sparkles: { log: {} },
   poop: [],
-  weight: [],
+  scale: [],
 };
 
 function load() {
@@ -125,7 +124,7 @@ export default function BananaCareApp() {
   const toggleMeal = (when, date = todayStr()) => { const next = { ...data }; const cur = next.meals[when][date]; next.meals[when][date] = !cur; setData(next); };
   const toggleSparkles = (date = todayStr()) => { const next = { ...data }; next.sparkles.log[date] = !next.sparkles.log[date]; setData(next); };
   const addPoop = (note = "") => { setData({ ...data, poop: [...data.poop, { id: uid(), date: todayStr(), time: nowTime(), note }] }); };
-  const addWeight = (date, kg) => { if (!date || !kg) return; setData({ ...data, weight: [...data.weight, { id: uid(), date, kg: Number(kg) }] }); };
+  const addScale = (date, kg) => { if (!date || !kg) return; setData({ ...data, scale: [...data.scale, { id: uid(), date, kg: Number(kg) }] }); };
   const addKindergarten = (entry) => { setData({ ...data, kindergarten: [...data.kindergarten, { id: uid(), ...entry }] }); };
   const deleteItem = (collection, id) => { const next = { ...data }; next[collection] = next[collection].filter((x) => x.id !== id); setData(next); };
 
@@ -141,9 +140,9 @@ export default function BananaCareApp() {
     reader.readAsText(file);
   };
 
-  const weightData = useMemo(() => {
-    return [...data.weight].sort((a, b) => new Date(a.date) - new Date(b.date)).map((d) => ({ date: d.date, kg: d.kg }));
-  }, [data.weight]);
+  const scaleData = useMemo(() => {
+    return [...data.scale].sort((a, b) => new Date(a.date) - new Date(b.date)).map((d) => ({ date: d.date, kg: d.kg }));
+  }, [data.scale]);
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900 pb-24">
@@ -206,8 +205,8 @@ export default function BananaCareApp() {
           <KindergartenSection list={data.kindergarten} add={addKindergarten} remove={(id) => deleteItem("kindergarten", id)} />
         )}
 
-        {activeTab === "weight" && (
-          <WeightSection weightData={weightData} addWeight={addWeight} />
+        {activeTab === "scale" && (
+          <ScaleSection scaleData={scaleData} addScale={addScale} />
         )}
       </main>
 
@@ -216,7 +215,7 @@ export default function BananaCareApp() {
           <TabButton icon={<Activity className="w-5 h-5" />} label="대시보드" active={activeTab === "dashboard"} onClick={() => setActiveTab("dashboard")} />
           <TabButton icon={<Pill className="w-5 h-5" />} label="건강/위생" active={activeTab === "health"} onClick={() => setActiveTab("health")} />
           <TabButton icon={<Footprints className="w-5 h-5" />} label="활동" active={activeTab === "activity"} onClick={() => setActiveTab("activity")} />
-          <TabButton icon={<Weight className="w-5 h-5" />} label="몸무게" active={activeTab === "weight"} onClick={() => setActiveTab("weight")} />
+          <TabButton icon={<Scale className="w-5 h-5" />} label="몸무게" active={activeTab === "scale"} onClick={() => setActiveTab("scale")} />
         </div>
       </nav>
     </div>
@@ -229,7 +228,7 @@ function Tabs({ active, onChange }) {
     { key: "health", label: "건강/위생" },
     { key: "activity", label: "활동" },
     { key: "school", label: "유치원" },
-    { key: "weight", label: "몸무게" },
+    { key: "scale", label: "몸무게" },
   ];
   return (
     <div className="flex gap-2 overflow-x-auto pb-1 mb-3 -mx-1 px-1">
@@ -269,13 +268,13 @@ function Dashboard({ data, dueRecurring, toggleDailySupplement, completeVaccine,
         />
         <QuickCheck
           title="아침 밥"
-          icon={<Soup className="w-5 h-5" />}
+          icon={<Utensils className="w-5 h-5" />}
           done={!!data.meals.AM[todayStr()]}
           onClick={() => toggleMeal("AM")}
         />
         <QuickCheck
           title="저녁 밥"
-          icon={<Soup className="w-5 h-5" />}
+          icon={<Utensils className="w-5 h-5" />}
           done={!!data.meals.PM[todayStr()]}
           onClick={() => toggleMeal("PM")}
         />
@@ -418,7 +417,7 @@ function ActivitySection({ walks, addWalk, poop, addPoop, meals, toggleMeal, spa
       </Card>
 
       <div className="grid grid-cols-2 gap-3">
-        <Card title="식사" icon={<Soup className="w-5 h-5" />}>
+        <Card title="식사" icon={<Utensils className="w-5 h-5" />}>
           <div className="flex gap-2 mb-2">
             <button onClick={() => toggleMeal("AM")} className="flex-1 px-3 py-2 rounded-xl border">아침 먹음</button>
             <button onClick={() => toggleMeal("PM")} className="flex-1 px-3 py-2 rounded-xl border">저녁 먹음</button>
@@ -507,21 +506,21 @@ function KindergartenSection({ list, add, remove }) {
   );
 }
 
-function WeightSection({ weightData, addWeight }) {
+function ScaleSection({ scaleData, addScale }) {
   const [date, setDate] = useState(todayStr());
   const [kg, setKg] = useState("");
 
   return (
     <div>
-      <Card title="몸무게 기록" icon={<Weight className="w-5 h-5" />}>
-        <div className="flex items-center gap-2 mb-4">
-          <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="px-3 py-2 rounded-xl border" />
-          <input type="number" step="0.01" placeholder="kg" value={kg} onChange={(e) => setKg(e.target.value)} className="px-3 py-2 rounded-xl border w-28" />
-          <button onClick={() => { addWeight(date, kg); setKg(""); }} className="px-3 py-2 rounded-xl border">추가</button>
+              <Card title="몸무게 기록" icon={<Scale className="w-5 h-5" />}>
+          <div className="flex items-center gap-2 mb-4">
+            <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="px-3 py-2 rounded-xl border" />
+            <input type="number" step="0.01" placeholder="kg" value={kg} onChange={(e) => setKg(e.target.value)} className="px-3 py-2 rounded-xl border w-28" />
+            <button onClick={() => { addScale(date, kg); setKg(""); }} className="px-3 py-2 rounded-xl border">추가</button>
         </div>
         <div className="h-64 w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={weightData} margin={{ left: 8, right: 8, top: 8, bottom: 8 }}>
+            <LineChart data={scaleData} margin={{ left: 8, right: 8, top: 8, bottom: 8 }}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="date" tick={{ fontSize: 12 }} />
               <YAxis tick={{ fontSize: 12 }} domain={["auto", "auto"]} />
