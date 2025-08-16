@@ -1,8 +1,10 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
-import { onAuthStateChanged } from "firebase/auth";
+import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "./firebase";
 import Login from "./Login";
+import Signup from "./Signup";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 
 /**
  * Banana Care – 디자인 반영 단일 파일(App.jsx 대체용)
@@ -52,23 +54,26 @@ const defaultState = {
 };
 export default function App() {
   const [user, setUser] = useState(null);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    onAuthStateChanged(auth, (currentUser) => {
+    const unsub = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
+      setReady(true);
     });
+    return () => unsub();
   }, []);
 
-  if (!user) {
-    return <Login />;
-  }
+  if (!ready) return null; // 초기 로딩
 
   return (
-    <div>
-      <h1>Banana Care 메인 화면</h1>
-      <p>로그인 사용자: {user.displayName}</p>
-      <button onClick={() => signOut(auth)}>로그아웃</button>
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/login" element={!user ? <Login /> : <Navigate to="/" />} />
+        <Route path="/signup" element={!user ? <Signup /> : <Navigate to="/" />} />
+        <Route path="/" element={user ? <BananaApp /> : <Navigate to="/login" />} />
+      </Routes>
+    </Router>
   );
 }
 function load() {
@@ -115,6 +120,14 @@ function save(s) { localStorage.setItem(KEY, JSON.stringify(s)); }
 function BananaApp() {
   const [tab, setTab] = useState("home"); // calendar | today | home | health | diary → 디자인상: calendar/today(home)/health/diary
   const [state, setState] = useState(defaultState);
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+    } catch (error) {
+      console.error("로그아웃 에러:", error);
+    }
+  };
 
   useEffect(() => { setState(load()); }, []);
   useEffect(() => { save(state); }, [state]);
@@ -229,7 +242,7 @@ function BananaApp() {
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900 flex justify-center">
       <div className="w-full max-w-[420px] min-h-screen flex flex-col">
-        <Header />
+        <Header onLogout={handleLogout} />
 
         <main className="flex-1 px-6 py-4 pb-[calc(4rem+env(safe-area-inset-bottom))]">
           {tab === "calendar" && <CalendarScreen calendar={state.calendar} routine={state.routine} timeline={state.timeline} onDeleteByDate={deleteTimelineByDateIndex} />}
@@ -278,11 +291,17 @@ function BananaApp() {
   );
 }
 
-function Header() {
+function Header({ onLogout }) {
   return (
     <header className="sticky top-0 z-10 bg-white/90 backdrop-blur border-b px-6 pt-[env(safe-area-inset-top)]">
-      <div className="h-16 flex items-end">
+      <div className="h-16 flex items-end justify-between">
         <h1 className="font-bold text-2xl tracking-tight -mt-1 mb-1">Banana Care</h1>
+        <button
+          onClick={onLogout}
+          className="px-3 py-1 text-sm text-gray-600 hover:text-gray-800 border rounded-lg"
+        >
+          로그아웃
+        </button>
       </div>
     </header>
   );
@@ -1564,18 +1583,4 @@ function makeMedEntry(type, dose) {
 }
 function makeWalkEntry(start, end, minutes) {
   return { date: todayStr(), start, end, minutes: +minutes };
-
-  const [user, setUser] = useState(null);
-  const [ready, setReady] = useState(false);
-
-  useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (u) => {
-      setUser(u);
-      setReady(true);
-    });
-    return () => unsub();
-  }, []);
-
-  if (!ready) return null; // 초기 로딩
-  return user ? <BananaApp /> : <Login />;
 }

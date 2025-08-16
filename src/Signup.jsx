@@ -1,18 +1,17 @@
-// src/Login.jsx
+// src/Signup.jsx
 import { useState, useEffect } from "react";
 import {
   signInWithRedirect,
-  signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
-  sendPasswordResetEmail,
   getRedirectResult,
 } from "firebase/auth";
 import { auth, provider } from "./firebase";
 import { Link } from "react-router-dom";
 
-export default function Login() {
+export default function Signup() {
   const [email, setEmail] = useState("");
   const [pw, setPw] = useState("");
+  const [confirmPw, setConfirmPw] = useState("");
   const [msg, setMsg] = useState("");
 
   // 리다이렉트 결과 처리
@@ -21,11 +20,11 @@ export default function Login() {
       try {
         const result = await getRedirectResult(auth);
         if (result) {
-          // 로그인 성공
-          console.log("Google 로그인 성공:", result.user);
+          // 회원가입 성공
+          console.log("Google 회원가입 성공:", result.user);
         }
       } catch (error) {
-        console.error("리다이렉트 로그인 에러:", error);
+        console.error("리다이렉트 회원가입 에러:", error);
         setMsg(error.message);
       }
     };
@@ -33,7 +32,7 @@ export default function Login() {
     handleRedirectResult();
   }, []);
 
-  const loginWithGoogle = async () => {
+  const signupWithGoogle = async () => {
     setMsg("");
     try {
       await signInWithRedirect(auth, provider);
@@ -43,39 +42,33 @@ export default function Login() {
     }
   };
 
-  const loginWithEmail = async () => {
-    setMsg("");
-    try {
-      await signInWithEmailAndPassword(auth, email, pw);
-    } catch (e) {
-      setMsg(e.message);
-      console.error(e);
-    }
-  };
-
   const signupWithEmail = async () => {
     setMsg("");
+    
+    if (!email || !pw || !confirmPw) {
+      return setMsg("모든 필드를 입력해 주세요.");
+    }
+    
+    if (pw !== confirmPw) {
+      return setMsg("비밀번호가 일치하지 않습니다.");
+    }
+    
+    if (pw.length < 6) {
+      return setMsg("비밀번호는 최소 6자 이상이어야 합니다.");
+    }
+
     try {
       await createUserWithEmailAndPassword(auth, email, pw);
+      setMsg("회원가입이 완료되었습니다!");
     } catch (e) {
       setMsg(e.message);
       console.error(e);
-    }
-  };
-
-  const resetPw = async () => {
-    if (!email) return setMsg("이메일을 입력해 주세요.");
-    try {
-      await sendPasswordResetEmail(auth, email);
-      setMsg("비밀번호 재설정 메일을 보냈어요.");
-    } catch (e) {
-      setMsg(e.message);
     }
   };
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-6">
-      <h1 className="text-2xl font-bold mb-6">Banana Care</h1>
+      <h1 className="text-2xl font-bold mb-6">Banana Care 회원가입</h1>
 
       {/* 이메일/비밀번호 */}
       <div className="bg-white w-80 max-w-full rounded-2xl border p-4 space-y-3 mb-6">
@@ -93,39 +86,31 @@ export default function Login() {
           onChange={(e) => setPw(e.target.value)}
           className="w-full px-3 py-2 rounded-xl border"
         />
-                 <button
-           onClick={loginWithEmail}
-           className="w-full px-3 py-2 rounded-xl border bg-black text-white"
-         >
-           이메일 로그인
-         </button>
-         <button
-           onClick={resetPw}
-           className="w-full text-sm text-gray-600 hover:underline"
-         >
-           비밀번호를 잊어버리셨나요?
-         </button>
+        <input
+          type="password"
+          placeholder="비밀번호 확인"
+          value={confirmPw}
+          onChange={(e) => setConfirmPw(e.target.value)}
+          className="w-full px-3 py-2 rounded-xl border"
+        />
+        <button
+          onClick={signupWithEmail}
+          className="w-full px-3 py-2 rounded-xl border bg-black text-white"
+        >
+          이메일 회원가입
+        </button>
 
         {!!msg && (
           <div className="text-sm text-red-500 whitespace-pre-wrap">{msg}</div>
         )}
       </div>
 
-      <div className="mt-4 text-center">
-        <p className="text-sm text-gray-600">
-          계정이 없으신가요?{" "}
-          <Link to="/signup" className="text-blue-600 hover:underline">
-            회원가입하기
-          </Link>
-        </p>
-      </div>
+      <div className="text-gray-400 text-sm mb-4">또는</div>
 
-      <div className="text-gray-400 text-sm mb-4 mt-6">또는</div>
-
-      {/* 구글 로그인 */}
+      {/* 구글 회원가입 */}
       <button
-        onClick={loginWithGoogle}
-        className="gsi-material-button mb-3"
+        onClick={signupWithGoogle}
+        className="gsi-material-button"
       >
         <div className="gsi-material-button-state"></div>
         <div className="gsi-material-button-content-wrapper">
@@ -138,12 +123,19 @@ export default function Login() {
               <path fill="none" d="M0 0h48v48H0z"></path>
             </svg>
           </div>
-          <span className="gsi-material-button-contents">Sign in with Google</span>
-          <span style={{display: "none"}}>Sign in with Google</span>
+          <span className="gsi-material-button-contents">Sign up with Google</span>
+          <span style={{display: "none"}}>Sign up with Google</span>
         </div>
       </button>
 
-
+      <div className="mt-6 text-center">
+        <p className="text-sm text-gray-600">
+          이미 계정이 있으신가요?{" "}
+          <Link to="/login" className="text-blue-600 hover:underline">
+            로그인하기
+          </Link>
+        </p>
+      </div>
     </div>
   );
 }
