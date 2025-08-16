@@ -19,6 +19,7 @@ export default function Login() {
   useEffect(() => {
     const handleRedirectResult = async () => {
       try {
+        console.log("리다이렉트 결과 확인 중...");
         const result = await getRedirectResult(auth);
         if (result) {
           // 로그인 성공
@@ -28,9 +29,9 @@ export default function Login() {
       } catch (error) {
         console.error("리다이렉트 로그인 에러:", error);
         if (error.code === 'auth/unauthorized-domain') {
-          setMsg("도메인이 승인되지 않았습니다. Firebase 콘솔에서 localhost를 추가해주세요.");
+          setMsg("도메인이 승인되지 않았습니다. Firebase 콘솔에서 banana-care.vercel.app을 추가해주세요.");
         } else {
-          setMsg(error.message);
+          setMsg(`리다이렉트 에러: ${error.message}`);
         }
       }
     };
@@ -41,10 +42,15 @@ export default function Login() {
   const loginWithGoogle = async () => {
     setMsg("");
     try {
+      console.log("구글 로그인 시도...");
       await signInWithRedirect(auth, provider);
     } catch (e) {
-      setMsg(e.message);
-      console.error(e);
+      console.error("구글 로그인 에러:", e);
+      if (e.code === 'auth/unauthorized-domain') {
+        setMsg("도메인이 승인되지 않았습니다. Firebase 콘솔에서 banana-care.vercel.app을 추가해주세요.");
+      } else {
+        setMsg(`로그인 에러: ${e.message}`);
+      }
     }
   };
 
