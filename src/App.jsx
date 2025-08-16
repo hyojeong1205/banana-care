@@ -50,7 +50,27 @@ const defaultState = {
   meds: [],
   walks: [],
 };
+export default function App() {
+  const [user, setUser] = useState(null);
 
+  useEffect(() => {
+    onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+  }, []);
+
+  if (!user) {
+    return <Login />;
+  }
+
+  return (
+    <div>
+      <h1>Banana Care 메인 화면</h1>
+      <p>로그인 사용자: {user.displayName}</p>
+      <button onClick={() => signOut(auth)}>로그아웃</button>
+    </div>
+  );
+}
 function load() {
   try { 
     const raw = localStorage.getItem(KEY); 
@@ -1544,10 +1564,7 @@ function makeMedEntry(type, dose) {
 }
 function makeWalkEntry(start, end, minutes) {
   return { date: todayStr(), start, end, minutes: +minutes };
-}
 
-
-export default function App() {
   const [user, setUser] = useState(null);
   const [ready, setReady] = useState(false);
 
@@ -1559,6 +1576,6 @@ export default function App() {
     return () => unsub();
   }, []);
 
-  if (!ready) return null;        // 초기 로딩 잠깐 비움(스피너 넣어도 됨)
+  if (!ready) return null; // 초기 로딩
   return user ? <BananaApp /> : <Login />;
 }
