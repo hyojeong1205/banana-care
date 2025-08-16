@@ -1,5 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "./firebase";
+import Login from "./Login";
 
 /**
  * Banana Care – 디자인 반영 단일 파일(App.jsx 대체용)
@@ -89,7 +92,7 @@ function load() {
 }
 function save(s) { localStorage.setItem(KEY, JSON.stringify(s)); }
 
-export default function App() {
+function BananaApp() {
   const [tab, setTab] = useState("home"); // calendar | today | home | health | diary → 디자인상: calendar/today(home)/health/diary
   const [state, setState] = useState(defaultState);
 
@@ -1541,4 +1544,21 @@ function makeMedEntry(type, dose) {
 }
 function makeWalkEntry(start, end, minutes) {
   return { date: todayStr(), start, end, minutes: +minutes };
+}
+
+
+export default function App() {
+  const [user, setUser] = useState(null);
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, (u) => {
+      setUser(u);
+      setReady(true);
+    });
+    return () => unsub();
+  }, []);
+
+  if (!ready) return null;        // 초기 로딩 잠깐 비움(스피너 넣어도 됨)
+  return user ? <BananaApp /> : <Login />;
 }
