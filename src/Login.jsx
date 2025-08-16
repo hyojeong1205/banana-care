@@ -23,10 +23,15 @@ export default function Login() {
         if (result) {
           // 로그인 성공
           console.log("Google 로그인 성공:", result.user);
+          setMsg("로그인 성공!");
         }
       } catch (error) {
         console.error("리다이렉트 로그인 에러:", error);
-        setMsg(error.message);
+        if (error.code === 'auth/unauthorized-domain') {
+          setMsg("도메인이 승인되지 않았습니다. Firebase 콘솔에서 localhost를 추가해주세요.");
+        } else {
+          setMsg(error.message);
+        }
       }
     };
 
