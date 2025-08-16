@@ -58,6 +58,7 @@ export default function App() {
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (currentUser) => {
+      console.log("Auth state changed:", currentUser ? "User logged in" : "No user");
       setUser(currentUser);
       setReady(true);
     });

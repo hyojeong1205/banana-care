@@ -1,11 +1,10 @@
 // src/Login.jsx
 import { useState, useEffect } from "react";
 import {
-  signInWithRedirect,
+  signInWithPopup,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   sendPasswordResetEmail,
-  getRedirectResult,
 } from "firebase/auth";
 import { auth, provider } from "./firebase";
 import { Link } from "react-router-dom";
@@ -15,39 +14,23 @@ export default function Login() {
   const [pw, setPw] = useState("");
   const [msg, setMsg] = useState("");
 
-  // 리다이렉트 결과 처리
-  useEffect(() => {
-    const handleRedirectResult = async () => {
-      try {
-        console.log("리다이렉트 결과 확인 중...");
-        const result = await getRedirectResult(auth);
-        if (result) {
-          // 로그인 성공
-          console.log("Google 로그인 성공:", result.user);
-          setMsg("로그인 성공!");
-        }
-      } catch (error) {
-        console.error("리다이렉트 로그인 에러:", error);
-        if (error.code === 'auth/unauthorized-domain') {
-          setMsg("도메인이 승인되지 않았습니다. Firebase 콘솔에서 banana-care.vercel.app을 추가해주세요.");
-        } else {
-          setMsg(`리다이렉트 에러: ${error.message}`);
-        }
-      }
-    };
 
-    handleRedirectResult();
-  }, []);
 
   const loginWithGoogle = async () => {
     setMsg("");
     try {
       console.log("구글 로그인 시도...");
-      await signInWithRedirect(auth, provider);
+      const result = await signInWithPopup(auth, provider);
+      console.log("Google 로그인 성공:", result.user);
+      setMsg("로그인 성공!");
     } catch (e) {
       console.error("구글 로그인 에러:", e);
       if (e.code === 'auth/unauthorized-domain') {
         setMsg("도메인이 승인되지 않았습니다. Firebase 콘솔에서 banana-care.vercel.app을 추가해주세요.");
+      } else if (e.code === 'auth/popup-blocked') {
+        setMsg("팝업이 차단되었습니다. 팝업 차단을 해제해주세요.");
+      } else if (e.code === 'auth/popup-closed-by-user') {
+        setMsg("로그인이 취소되었습니다.");
       } else {
         setMsg(`로그인 에러: ${e.message}`);
       }
