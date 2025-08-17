@@ -449,10 +449,10 @@ function BananaApp() {
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900 flex justify-center">
-      <div className="w-full max-w-[420px] min-h-screen flex flex-col">
+      <div className="w-full max-w-[420px] lg:max-w-4xl xl:max-w-6xl min-h-screen flex flex-col">
         <Header onLogout={handleLogout} onShowTutorial={() => setShowTutorial(true)} />
 
-        <main className="flex-1 px-6 py-4 pb-[calc(4rem+env(safe-area-inset-bottom))]">
+        <main className="flex-1 px-6 py-4 pb-[calc(4rem+env(safe-area-inset-bottom))] lg:pb-4">
           {tab === "calendar" && <CalendarScreen calendar={state.calendar} routine={state.routine} timeline={state.timeline} onDeleteByDate={deleteTimelineByDateIndex} onAddRoutine={addTimeline} weight={state.weight} meds={state.meds} walks={state.walks} diary={state.diary || []} medCategories={state.medCategories} />}
           {tab === "home" && (
             <HomeScreen
@@ -527,11 +527,11 @@ function TutorialModal({ tab, onClose, dontShowAgain, onDontShowAgainChange }) {
               content: (
           <div className="space-y-4">
             <div className="flex justify-center items-center">
-              <img src="/img/calendar_ttr_01.svg" alt="캘린더 튜토리얼 1" className="w-[90%] max-w-[288px] rounded-lg" />
+              <img src="/img/calendar_ttr_01.svg" alt="캘린더 튜토리얼 1" className="w-[90%] max-w-[288px] lg:max-w-[400px] rounded-lg" />
             </div>
             <div className="text-center space-y-2">
-              <p className="text-sm text-gray-600">완료한 루틴이 해당 날짜에 점으로 표시돼요.</p>
-              <p className="text-sm text-gray-600">어떤 루틴을 했는지 색깔별로 바로 알 수 있어요.</p>
+              <p className="text-sm lg:text-base text-gray-600">완료한 루틴이 해당 날짜에 점으로 표시돼요.</p>
+              <p className="text-sm lg:text-base text-gray-600">어떤 루틴을 했는지 색깔별로 바로 알 수 있어요.</p>
             </div>
           </div>
         )
@@ -545,7 +545,7 @@ function TutorialModal({ tab, onClose, dontShowAgain, onDontShowAgainChange }) {
               <img src="/img/calendar_ttr_02.svg" alt="캘린더 튜토리얼 2" className="w-[90%] max-w-[288px] rounded-lg" />
             </div>
             <div className="text-center space-y-2">
-              <p className="text-sm text-gray-600">날짜를 누르면 해당 날짜의 루틴을 시간과 함께 자세히 볼 수 있어요.</p>
+              <p className="text-sm lg:text-base text-gray-600">날짜를 누르면 해당 날짜의 루틴을 시간과 함께 자세히 볼 수 있어요.</p>
             </div>
           </div>
         )
@@ -559,8 +559,8 @@ function TutorialModal({ tab, onClose, dontShowAgain, onDontShowAgainChange }) {
               <img src="/img/calendar_ttr_03.svg" alt="캘린더 튜토리얼 3" className="w-[90%] max-w-[288px] rounded-lg" />
             </div>
             <div className="text-center space-y-2">
-              <p className="text-sm text-gray-600">➕ 버튼으로 새 루틴을 추가할 수 있어요.</p>
-              <p className="text-sm text-gray-600">✏️ 버튼으로 기존 루틴을 수정하거나 삭제할 수 있어요.</p>
+              <p className="text-sm lg:text-base text-gray-600">➕ 버튼으로 새 루틴을 추가할 수 있어요.</p>
+              <p className="text-sm lg:text-base text-gray-600">✏️ 버튼으로 기존 루틴을 수정하거나 삭제할 수 있어요.</p>
             </div>
           </div>
         )
@@ -574,11 +574,11 @@ function TutorialModal({ tab, onClose, dontShowAgain, onDontShowAgainChange }) {
       content: (
         <div className="space-y-4">
           <div className="flex justify-center">
-            <img src="/img/health_ttr_01.svg" alt="건강 튜토리얼 1" className="w-full max-w-xs rounded-lg" />
+            <img src="/img/health_ttr_01.svg" alt="건강 튜토리얼 1" className="w-full max-w-xs lg:max-w-sm rounded-lg" />
           </div>
           <div className="text-center space-y-2">
-            <p className="text-sm text-gray-600">상단 탭에서 몸무게, 투약, 산책 기록을 선택해</p>
-            <p className="text-sm text-gray-600">날짜별로 입력하고 확인할 수 있어요.</p>
+            <p className="text-sm lg:text-base text-gray-600">상단 탭에서 몸무게, 투약, 산책 기록을 선택해</p>
+            <p className="text-sm lg:text-base text-gray-600">날짜별로 입력하고 확인할 수 있어요.</p>
           </div>
         </div>
       )
@@ -589,11 +589,11 @@ function TutorialModal({ tab, onClose, dontShowAgain, onDontShowAgainChange }) {
       content: (
         <div className="space-y-4">
           <div className="flex justify-center">
-            <img src="/img/health_ttr_02.svg" alt="건강 튜토리얼 2" className="w-full max-w-xs rounded-lg" />
+            <img src="/img/health_ttr_02.svg" alt="건강 튜토리얼 2" className="w-full max-w-xs lg:max-w-sm rounded-lg" />
           </div>
           <div className="text-center space-y-2">
-            <p className="text-sm text-gray-600">날짜와 몸무게를 입력하고 추가하면</p>
-            <p className="text-sm text-gray-600">그래프에서 변화 과정을 한눈에 볼 수 있어요.</p>
+            <p className="text-sm lg:text-base text-gray-600">날짜와 몸무게를 입력하고 추가하면</p>
+            <p className="text-sm lg:text-base text-gray-600">그래프에서 변화 과정을 한눈에 볼 수 있어요.</p>
           </div>
         </div>
       )
@@ -604,11 +604,11 @@ function TutorialModal({ tab, onClose, dontShowAgain, onDontShowAgainChange }) {
       content: (
         <div className="space-y-4">
           <div className="flex justify-center">
-            <img src="/img/health_ttr_03.svg" alt="건강 튜토리얼 3" className="w-full max-w-xs rounded-lg" />
+            <img src="/img/health_ttr_03.svg" alt="건강 튜토리얼 3" className="w-full max-w-xs lg:max-w-sm rounded-lg" />
           </div>
           <div className="text-center space-y-2">
-            <p className="text-sm text-gray-600">입력한 몸무게를 리스트로 확인할 수 있어요.</p>
-            <p className="text-sm text-gray-600">✏️ 버튼을 눌러 수정하거나 삭제할 수 있어요.</p>
+            <p className="text-sm lg:text-base text-gray-600">입력한 몸무게를 리스트로 확인할 수 있어요.</p>
+            <p className="text-sm lg:text-base text-gray-600">✏️ 버튼을 눌러 수정하거나 삭제할 수 있어요.</p>
           </div>
         </div>
       )
@@ -619,12 +619,12 @@ function TutorialModal({ tab, onClose, dontShowAgain, onDontShowAgainChange }) {
       content: (
         <div className="space-y-4">
           <div className="flex justify-center">
-            <img src="/img/health_ttr_04.svg" alt="건강 튜토리얼 4" className="w-full max-w-xs rounded-lg" />
+            <img src="/img/health_ttr_04.svg" alt="건강 튜토리얼 4" className="w-full max-w-xs lg:max-w-sm rounded-lg" />
           </div>
           <div className="text-center space-y-2">
-            <p className="text-sm text-gray-600">약 이름과 용량을 버튼에 저장해두면</p>
-            <p className="text-sm text-gray-600">버튼 한 번으로 불러와 쉽게 기록할 수 있어요.</p>
-            <p className="text-sm text-gray-600">기록된 내용은 아래 리스트에서 확인할 수 있어요.</p>
+            <p className="text-sm lg:text-base text-gray-600">약 이름과 용량을 버튼에 저장해두면</p>
+            <p className="text-sm lg:text-base text-gray-600">버튼 한 번으로 불러와 쉽게 기록할 수 있어요.</p>
+            <p className="text-sm lg:text-base text-gray-600">기록된 내용은 아래 리스트에서 확인할 수 있어요.</p>
           </div>
         </div>
       )
@@ -635,11 +635,11 @@ function TutorialModal({ tab, onClose, dontShowAgain, onDontShowAgainChange }) {
       content: (
         <div className="space-y-4">
           <div className="flex justify-center">
-            <img src="/img/health_ttr_05.svg" alt="건강 튜토리얼 5" className="w-full max-w-xs rounded-lg" />
+            <img src="/img/health_ttr_05.svg" alt="건강 튜토리얼 5" className="w-full max-w-xs lg:max-w-sm rounded-lg" />
           </div>
           <div className="text-center space-y-2">
-            <p className="text-sm text-gray-600">시작 시간과 종료 시간을 입력하면</p>
-            <p className="text-sm text-gray-600">산책 시간이 자동 계산되어 리스트에 저장돼요.</p>
+            <p className="text-sm lg:text-base text-gray-600">시작 시간과 종료 시간을 입력하면</p>
+            <p className="text-sm lg:text-base text-gray-600">산책 시간이 자동 계산되어 리스트에 저장돼요.</p>
           </div>
         </div>
       )
@@ -653,11 +653,11 @@ function TutorialModal({ tab, onClose, dontShowAgain, onDontShowAgainChange }) {
       content: (
         <div className="space-y-4">
           <div className="flex justify-center">
-            <img src="/img/home_ttr_01.svg" alt="홈 튜토리얼 1" className="w-full max-w-xs rounded-lg" />
+            <img src="/img/home_ttr_01.svg" alt="홈 튜토리얼 1" className="w-full max-w-xs lg:max-w-sm rounded-lg" />
           </div>
           <div className="text-center space-y-2">
-            <p className="text-sm text-gray-600">퀵 버튼을 눌러서 바로 루틴을 기록할 수 있어요.</p>
-            <p className="text-sm text-gray-600">색깔별로 구분되어 한눈에 알아보기 쉬워요.</p>
+            <p className="text-sm lg:text-base text-gray-600">퀵 버튼을 눌러서 바로 루틴을 기록할 수 있어요.</p>
+            <p className="text-sm lg:text-base text-gray-600">색깔별로 구분되어 한눈에 알아보기 쉬워요.</p>
           </div>
         </div>
       )
@@ -668,11 +668,11 @@ function TutorialModal({ tab, onClose, dontShowAgain, onDontShowAgainChange }) {
       content: (
         <div className="space-y-4">
           <div className="flex justify-center">
-            <img src="/img/home_ttr_02.svg" alt="홈 튜토리얼 2" className="w-full max-w-xs rounded-lg" />
+            <img src="/img/home_ttr_02.svg" alt="홈 튜토리얼 2" className="w-full max-w-xs lg:max-w-sm rounded-lg" />
           </div>
           <div className="text-center space-y-2">
-            <p className="text-sm text-gray-600">오늘 완료한 루틴을 시간순으로 확인할 수 있어요.</p>
-            <p className="text-sm text-gray-600">✏️ 버튼으로 기록을 수정하거나 삭제할 수 있어요.</p>
+            <p className="text-sm lg:text-base text-gray-600">오늘 완료한 루틴을 시간순으로 확인할 수 있어요.</p>
+            <p className="text-sm lg:text-base text-gray-600">✏️ 버튼으로 기록을 수정하거나 삭제할 수 있어요.</p>
           </div>
         </div>
       )
@@ -683,11 +683,11 @@ function TutorialModal({ tab, onClose, dontShowAgain, onDontShowAgainChange }) {
       content: (
         <div className="space-y-4">
           <div className="flex justify-center">
-            <img src="/img/home_ttr_03.svg" alt="홈 튜토리얼 3" className="w-full max-w-xs rounded-lg" />
+            <img src="/img/home_ttr_03.svg" alt="홈 튜토리얼 3" className="w-full max-w-xs lg:max-w-sm rounded-lg" />
           </div>
           <div className="text-center space-y-2">
-            <p className="text-sm text-gray-600">정기 루틴의 다가오는 일정을 확인할 수 있어요.</p>
-            <p className="text-sm text-gray-600">D-day로 남은 날짜를 한눈에 볼 수 있어요.</p>
+            <p className="text-sm lg:text-base text-gray-600">정기 루틴의 다가오는 일정을 확인할 수 있어요.</p>
+            <p className="text-sm lg:text-base text-gray-600">D-day로 남은 날짜를 한눈에 볼 수 있어요.</p>
           </div>
         </div>
       )
@@ -698,11 +698,11 @@ function TutorialModal({ tab, onClose, dontShowAgain, onDontShowAgainChange }) {
       content: (
         <div className="space-y-4">
           <div className="flex justify-center">
-            <img src="/img/home_ttr_04.svg" alt="홈 튜토리얼 4" className="w-full max-w-xs rounded-lg" />
+            <img src="/img/home_ttr_04.svg" alt="홈 튜토리얼 4" className="w-full max-w-xs lg:max-w-sm rounded-lg" />
           </div>
           <div className="text-center space-y-2">
-            <p className="text-sm text-gray-600">➕ 버튼을 눌러서 새로운 루틴을 빠르게 추가할 수 있어요.</p>
-            <p className="text-sm text-gray-600">날짜와 시간을 선택해서 정확한 기록을 남길 수 있어요.</p>
+            <p className="text-sm lg:text-base text-gray-600">➕ 버튼을 눌러서 새로운 루틴을 빠르게 추가할 수 있어요.</p>
+            <p className="text-sm lg:text-base text-gray-600">날짜와 시간을 선택해서 정확한 기록을 남길 수 있어요.</p>
           </div>
         </div>
       )
@@ -713,11 +713,11 @@ function TutorialModal({ tab, onClose, dontShowAgain, onDontShowAgainChange }) {
       content: (
         <div className="space-y-4">
           <div className="flex justify-center">
-            <img src="/img/home_ttr_05.svg" alt="홈 튜토리얼 5" className="w-full max-w-xs rounded-lg" />
+            <img src="/img/home_ttr_05.svg" alt="홈 튜토리얼 5" className="w-full max-w-xs lg:max-w-sm rounded-lg" />
           </div>
           <div className="text-center space-y-2">
-            <p className="text-sm text-gray-600">홈 화면에서 오늘의 모든 케어를 한눈에 확인하고</p>
-            <p className="text-sm text-gray-600">빠르게 기록할 수 있어요.</p>
+            <p className="text-sm lg:text-base text-gray-600">홈 화면에서 오늘의 모든 케어를 한눈에 확인하고</p>
+            <p className="text-sm lg:text-base text-gray-600">빠르게 기록할 수 있어요.</p>
           </div>
         </div>
       )
@@ -731,11 +731,11 @@ function TutorialModal({ tab, onClose, dontShowAgain, onDontShowAgainChange }) {
       content: (
         <div className="space-y-4">
           <div className="flex justify-center">
-            <img src="/img/diary_ttr_01.svg" alt="다이어리 튜토리얼 1" className="w-full max-w-xs rounded-lg" />
+            <img src="/img/diary_ttr_01.svg" alt="다이어리 튜토리얼 1" className="w-full max-w-xs lg:max-w-sm rounded-lg" />
           </div>
           <div className="text-center space-y-2">
-            <p className="text-sm text-gray-600">맨 위 버튼을 누르면 새 일기를 작성할 수 있어요.</p>
-            <p className="text-sm text-gray-600">작성한 일기는 아래에서 피드 형태로 쌓여 확인할 수 있어요.</p>
+            <p className="text-sm lg:text-base text-gray-600">맨 위 버튼을 누르면 새 일기를 작성할 수 있어요.</p>
+            <p className="text-sm lg:text-base text-gray-600">작성한 일기는 아래에서 피드 형태로 쌓여 확인할 수 있어요.</p>
           </div>
         </div>
       )
@@ -746,11 +746,11 @@ function TutorialModal({ tab, onClose, dontShowAgain, onDontShowAgainChange }) {
       content: (
         <div className="space-y-4">
           <div className="flex justify-center">
-            <img src="/img/diary_ttr_02.svg" alt="다이어리 튜토리얼 2" className="w-full max-w-xs rounded-lg" />
+            <img src="/img/diary_ttr_02.svg" alt="다이어리 튜토리얼 2" className="w-full max-w-xs lg:max-w-sm rounded-lg" />
           </div>
           <div className="text-center space-y-2">
-            <p className="text-sm text-gray-600">날짜, 제목, 내용을 입력하고 사진도 함께 올려</p>
-            <p className="text-sm text-gray-600">일기를 기록할 수 있어요.</p>
+            <p className="text-sm lg:text-base text-gray-600">날짜, 제목, 내용을 입력하고 사진도 함께 올려</p>
+            <p className="text-sm lg:text-base text-gray-600">일기를 기록할 수 있어요.</p>
           </div>
         </div>
       )
@@ -764,11 +764,11 @@ function TutorialModal({ tab, onClose, dontShowAgain, onDontShowAgainChange }) {
       content: (
         <div className="space-y-4">
           <div className="flex justify-center">
-            <img src="/img/setting_ttr_01.svg" alt="설정 튜토리얼 1" className="w-full max-w-xs rounded-lg" />
+            <img src="/img/setting_ttr_01.svg" alt="설정 튜토리얼 1" className="w-full max-w-xs lg:max-w-sm rounded-lg" />
           </div>
           <div className="text-center space-y-2">
-            <p className="text-sm text-gray-600">루틴 버튼과 약 버튼을 추가·편집·삭제할 수 있어요.</p>
-            <p className="text-sm text-gray-600">버튼을 편집하려면 원하는 버튼을 클릭하세요.</p>
+            <p className="text-sm lg:text-base text-gray-600">루틴 버튼과 약 버튼을 추가·편집·삭제할 수 있어요.</p>
+            <p className="text-sm lg:text-base text-gray-600">버튼을 편집하려면 원하는 버튼을 클릭하세요.</p>
           </div>
         </div>
       )
@@ -824,34 +824,34 @@ function TutorialModal({ tab, onClose, dontShowAgain, onDontShowAgainChange }) {
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl max-w-sm w-full h-[600px] flex flex-col">
+      <div className="bg-white rounded-2xl max-w-sm lg:max-w-2xl w-full h-[600px] lg:h-[700px] flex flex-col">
         {/* 헤더 */}
-        <div className="flex items-center justify-between p-6 border-b flex-shrink-0">
-          <div className="flex items-center gap-2">
-            <span className="text-xl">{currentPageData.icon}</span>
-            <h2 className="text-lg font-bold">{currentPageData.title}</h2>
+        <div className="flex items-center justify-between p-6 lg:p-8 border-b flex-shrink-0">
+          <div className="flex items-center gap-2 lg:gap-3">
+            <span className="text-xl lg:text-2xl">{currentPageData.icon}</span>
+            <h2 className="text-lg lg:text-xl font-bold">{currentPageData.title}</h2>
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"
+            className="w-8 h-8 lg:w-10 lg:h-10 flex items-center justify-center rounded-full hover:bg-gray-100"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 lg:w-6 lg:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
 
         {/* 페이지 내용 */}
-        <div className="p-6 flex-1 overflow-y-auto">
+        <div className="p-6 lg:p-8 flex-1 overflow-y-auto">
           {currentPageData.content}
         </div>
 
         {/* 페이지네이션 */}
-        <div className="flex justify-center gap-2 pb-4 flex-shrink-0">
+        <div className="flex justify-center gap-2 lg:gap-3 pb-4 flex-shrink-0">
           {pages.map((_, index) => (
             <div
               key={index}
-              className={`w-2 h-2 rounded-full ${
+              className={`w-2 h-2 lg:w-3 lg:h-3 rounded-full ${
                 index === currentPage ? 'bg-blue-400' : 'bg-gray-300'
               }`}
             />
@@ -859,34 +859,34 @@ function TutorialModal({ tab, onClose, dontShowAgain, onDontShowAgainChange }) {
         </div>
 
         {/* 네비게이션 버튼 */}
-        <div className="p-6 border-t flex-shrink-0">
+        <div className="p-6 lg:p-8 border-t flex-shrink-0">
           {/* 다시보지않기 체크박스 */}
-          <div className="flex justify-center mb-4">
+          <div className="flex justify-center mb-4 lg:mb-6">
             <label className="flex items-center gap-3 cursor-pointer">
               <input
                 type="checkbox"
                 checked={dontShowAgain}
                 onChange={(e) => onDontShowAgainChange(e.target.checked)}
-                className="w-4 h-4"
+                className="w-4 h-4 lg:w-5 lg:h-5"
               />
-              <span className="text-sm text-gray-600">
+              <span className="text-sm lg:text-base text-gray-600">
                 다시 보지 않기
               </span>
             </label>
           </div>
           
-          <div className="flex gap-2">
+          <div className="flex gap-2 lg:gap-3">
             {currentPage > 0 && (
               <button
                 onClick={prevPage}
-                className="flex-1 py-3 border border-gray-300 text-gray-700 rounded-xl font-medium"
+                className="flex-1 py-3 lg:py-4 border border-gray-300 text-gray-700 rounded-xl font-medium lg:text-base"
               >
                 이전
               </button>
             )}
             <button
               onClick={nextPage}
-              className={`py-3 rounded-xl font-medium ${
+              className={`py-3 lg:py-4 rounded-xl font-medium lg:text-base ${
                 currentPage > 0 ? 'flex-1 bg-black text-white' : 'w-full bg-black text-white'
               }`}
             >
@@ -922,16 +922,16 @@ function Header({ onLogout, onShowTutorial }) {
 
   return (
     <header className="sticky top-0 z-10 bg-white/90 backdrop-blur border-b px-6 pt-[env(safe-area-inset-top)]">
-      <div className="h-16 flex items-end justify-between">
+      <div className="h-16 lg:h-20 flex items-end justify-between">
         <div className="flex items-center gap-2">
-        <h1 className="font-bold text-2xl tracking-tight -mt-1 mb-1">Banana Care</h1>
+        <h1 className="font-bold text-2xl lg:text-3xl tracking-tight -mt-1 mb-1">Banana Care</h1>
           
           {/* 도움말 버튼 */}
           <button
             onClick={onShowTutorial}
             className="p-0.5 rounded-full hover:bg-gray-100"
           >
-            <img src="/img/question.svg" alt="도움말" className="w-3 h-3" />
+            <img src="/img/question.svg" alt="도움말" className="w-3 h-3 lg:w-4 lg:h-4" />
           </button>
         </div>
         
@@ -1009,9 +1009,9 @@ function BottomNav({ tab, onChange }) {
     </button>
   );
   return (
-    <nav className="fixed bottom-0 left-0 right-0 flex justify-center">
-      <div className="w-full max-w-[420px] border-t bg-white px-6 pb-[env(safe-area-inset-bottom)]">
-        <div className="h-14 grid grid-cols-5">
+    <nav className="fixed bottom-0 left-0 right-0 flex justify-center lg:relative lg:bottom-auto">
+      <div className="w-full max-w-[420px] lg:max-w-4xl xl:max-w-6xl border-t bg-white px-6 pb-[env(safe-area-inset-bottom)] lg:pb-0">
+        <div className="h-14 grid grid-cols-5 lg:grid-cols-5 lg:h-16">
           <Item id="calendar" label="캘린더" />
           <Item id="health" label="건강" />
           <Item id="home" label="홈" />
@@ -1180,12 +1180,12 @@ function CalendarScreen({ calendar, routine, timeline = [], onDeleteByDate, onAd
   return (
     <section aria-labelledby="cal-title">
       <h2 id="cal-title" className="sr-only">캘린더</h2>
-      <div className="flex items-center justify-between mb-3">
-        <div className="text-lg font-semibold">{year}년 {month + 1}월</div>
+      <div className="flex items-center justify-between mb-3 lg:mb-6">
+        <div className="text-lg lg:text-2xl font-semibold">{year}년 {month + 1}월</div>
         <select 
           value={filterType} 
           onChange={(e) => setFilterType(e.target.value)}
-          className="px-3 py-1 text-sm border rounded-lg bg-white"
+          className="px-3 py-1 lg:px-4 lg:py-2 text-sm lg:text-base border rounded-lg bg-white"
         >
           <option value="routine">루틴</option>
           <option value="weight">몸무게</option>
@@ -1194,10 +1194,10 @@ function CalendarScreen({ calendar, routine, timeline = [], onDeleteByDate, onAd
           <option value="diary">다이어리</option>
         </select>
       </div>
-      <div className="grid grid-cols-7 gap-1 text-center text-sm text-gray-500 mb-2">
+      <div className="grid grid-cols-7 gap-1 lg:gap-2 text-center text-sm lg:text-base text-gray-500 mb-2 lg:mb-4">
         {"일월화수목금토".split("").map((d) => <div key={d}>{d}</div>)}
       </div>
-      <div className="grid grid-cols-7 gap-1">
+      <div className="grid grid-cols-7 gap-1 lg:gap-2">
         {cells.map((d, i) => {
           const dateStr = d ? getDateString(year, month, d) : "";
           
@@ -1205,10 +1205,10 @@ function CalendarScreen({ calendar, routine, timeline = [], onDeleteByDate, onAd
             <button
               key={i}
               onClick={() => handleDateClick(dateStr)}
-              className="min-h-[4rem] rounded-xl bg-white border flex flex-col items-center p-1 hover:bg-gray-50 transition-colors"
+              className="min-h-[4rem] lg:min-h-[6rem] rounded-xl bg-white border flex flex-col items-center p-1 lg:p-2 hover:bg-gray-50 transition-colors"
             >
-              <div className={`text-sm ${[0,6].includes((i)%7)?"text-red-500":""}`}>{d || ""}</div>
-              <div className="flex flex-wrap gap-1 justify-start w-full flex-1 items-center">
+              <div className={`text-sm lg:text-base ${[0,6].includes((i)%7)?"text-red-500":""}`}>{d || ""}</div>
+              <div className="flex flex-wrap gap-1 lg:gap-2 justify-start w-full flex-1 items-center">
                 {renderFilteredItems(dateStr)}
               </div>
             </button>
@@ -1508,125 +1508,134 @@ function HomeScreen({ timeline, routine, upcoming, onQuickAdd, onApplyTimeline }
     };
   }, [confirm, onQuickAdd]);
   return (
-    <div className="space-y-6">
-      {/* 오늘 요약 */}
-      <Card>
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-          <div className="font-semibold">오늘 케어 기록</div>
-          <div className="text-sm text-gray-500">{todayStr()}</div>
+    <div className="space-y-6 lg:space-y-8">
+      {/* PC에서 2열 레이아웃 */}
+      <div className="lg:grid lg:grid-cols-2 lg:gap-8 lg:space-y-0 space-y-6">
+        {/* 오늘 요약 */}
+        <Card>
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+            <div className="font-semibold">오늘 케어 기록</div>
+            <div className="text-sm text-gray-500">{todayStr()}</div>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                if (!editMode) {
+                  setDraftTimeline(timeline);
+                  setEditMode(true);
+                } else {
+                  onApplyTimeline(draftTimeline || []);
+                  setEditMode(false);
+                  setDraftTimeline(null);
+                }
+              }}
+              className="w-8 h-8 grid place-items-center rounded-lg border"
+              title={editMode ? "완료" : "편집"}
+              aria-pressed={editMode}
+            >
+              {editMode ? (
+                <span className="text-xs font-medium">완료</span>
+              ) : (
+                <img src="/img/edit.png" alt="편집" className="w-4 h-4" />
+              )}
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={() => {
-              if (!editMode) {
-                setDraftTimeline(timeline);
-                setEditMode(true);
-              } else {
-                onApplyTimeline(draftTimeline || []);
-                setEditMode(false);
-                setDraftTimeline(null);
-              }
-            }}
-            className="w-8 h-8 grid place-items-center rounded-lg border"
-            title={editMode ? "완료" : "편집"}
-            aria-pressed={editMode}
-          >
-            {editMode ? (
-              <span className="text-xs font-medium">완료</span>
+          <div className="rounded-xl bg-white">
+            {(editMode ? (draftTimeline?.length || 0) : timeline.length) === 0 ? (
+              <div className="text-sm text-gray-400">아직 기록이 없어요</div>
             ) : (
-              <img src="/img/edit.png" alt="편집" className="w-4 h-4" />
+              <ul className="space-y-2">
+                {(editMode ? draftTimeline : timeline).slice().reverse().map((t, idx, arr) => {
+                  const originalIndex = (editMode ? draftTimeline : timeline).length - 1 - idx;
+                  return (
+                  <li key={idx} className="flex items-center gap-3">
+                    <span className="w-3 h-3 rounded-full" style={{ backgroundColor: t.color || "#E6F4EA" }} />
+                    <span className="text-sm text-gray-500 w-20">{t.time}</span>
+                    <span className="text-sm">{t.label}</span>
+                      {editMode && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setDraftTimeline(prev => prev.filter((_, i) => i !== originalIndex));
+                          }}
+                          className="ml-auto w-6 h-6 grid place-items-center rounded-full border text-xs text-gray-600"
+                          aria-label="삭제"
+                          title="삭제"
+                        >
+                          ×
+                        </button>
+                      )}
+                  </li>
+                  );
+                })}
+              </ul>
             )}
-          </button>
-        </div>
-        <div className="rounded-xl bg-white">
-          {(editMode ? (draftTimeline?.length || 0) : timeline.length) === 0 ? (
-            <div className="text-sm text-gray-400">아직 기록이 없어요</div>
+          </div>
+        </Card>
+
+        {/* 다가오는 일정 */}
+        <Card>
+          <div className="font-semibold mb-2">다가오는 일정</div>
+          {upcoming.length === 0 ? (
+            <div className="text-sm text-gray-400">예정 없음</div>
           ) : (
-            <ul className="space-y-2">
-              {(editMode ? draftTimeline : timeline).slice().reverse().map((t, idx, arr) => {
-                const originalIndex = (editMode ? draftTimeline : timeline).length - 1 - idx;
+            <ul className="space-y-3 text-sm">
+              {upcoming.map((u, i) => {
+                // 날짜 포맷팅
+                const formatDate = (date) => {
+                  const month = date.getMonth() + 1;
+                  const day = date.getDate();
+                  const weekday = ['일', '월', '화', '수', '목', '금', '토'][date.getDay()];
+                  return `${month}월 ${day}일 (${weekday})`;
+                };
+
+                // D-day 스타일 결정
+                let dDayStyle = "text-gray-500";
+                if (u.days === 0) {
+                  dDayStyle = "text-red-500 font-bold";
+                } else if (u.days === 1) {
+                  dDayStyle = "text-orange-500 font-semibold";
+                } else if (u.days <= 3) {
+                  dDayStyle = "text-yellow-600 font-medium";
+                }
+
                 return (
-                <li key={idx} className="flex items-center gap-3">
-                  <span className="w-3 h-3 rounded-full" style={{ backgroundColor: t.color || "#E6F4EA" }} />
-                  <span className="text-sm text-gray-500 w-20">{t.time}</span>
-                  <span className="text-sm">{t.label}</span>
-                    {editMode && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setDraftTimeline(prev => prev.filter((_, i) => i !== originalIndex));
-                        }}
-                        className="ml-auto w-6 h-6 grid place-items-center rounded-full border text-xs text-gray-600"
-                        aria-label="삭제"
-                        title="삭제"
-                      >
-                        ×
-                      </button>
-                    )}
+                  <li key={i} className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50">
+                  <span className="w-3 h-3 rounded-full" style={{ backgroundColor: u.color }} />
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className={`${dDayStyle}`}>{u.d}</span>
+                        <span className="font-medium">{u.label}</span>
+                      </div>
+                      <div className="text-xs text-gray-400 mt-1">
+                        {formatDate(u.nextDate)}
+                      </div>
+                    </div>
                 </li>
                 );
               })}
             </ul>
           )}
-        </div>
-      </Card>
+        </Card>
+      </div>
 
       {/* 데일리루틴 */}
       <section>
-        <h3 className="font-semibold text-lg mb-2">데일리루틴</h3>
-        <div className="text-sm text-gray-500 mb-1">오전</div>
-        <ChipRow items={routine.am} onAdd={(item)=>setConfirm({ label:item.label, color: item.color, date: todayStr(), time: nowTime() })} />
-        <div className="text-sm text-gray-500 mt-3 mb-1">오후</div>
-        <ChipRow items={routine.pm} onAdd={(item)=>setConfirm({ label:item.label, color: item.color, date: todayStr(), time: nowTime() })} />
-        <h4 className="font-semibold text-lg mt-5 mb-2">정기루틴</h4>
+        <h3 className="font-semibold text-lg mb-2 lg:text-xl">데일리루틴</h3>
+        <div className="lg:grid lg:grid-cols-2 lg:gap-8">
+          <div>
+            <div className="text-sm text-gray-500 mb-1">오전</div>
+            <ChipRow items={routine.am} onAdd={(item)=>setConfirm({ label:item.label, color: item.color, date: todayStr(), time: nowTime() })} />
+          </div>
+          <div>
+            <div className="text-sm text-gray-500 mb-1">오후</div>
+            <ChipRow items={routine.pm} onAdd={(item)=>setConfirm({ label:item.label, color: item.color, date: todayStr(), time: nowTime() })} />
+          </div>
+        </div>
+        <h4 className="font-semibold text-lg mt-5 mb-2 lg:text-xl">정기루틴</h4>
         <ChipRow items={routine.reg} onAdd={(item)=>setConfirm({ label:item.label, color: item.color, date: todayStr(), time: nowTime() })} />
       </section>
-
-      {/* 다가오는 일정 */}
-      <Card>
-        <div className="font-semibold mb-2">다가오는 일정</div>
-        {upcoming.length === 0 ? (
-          <div className="text-sm text-gray-400">예정 없음</div>
-        ) : (
-          <ul className="space-y-3 text-sm">
-            {upcoming.map((u, i) => {
-              // 날짜 포맷팅
-              const formatDate = (date) => {
-                const month = date.getMonth() + 1;
-                const day = date.getDate();
-                const weekday = ['일', '월', '화', '수', '목', '금', '토'][date.getDay()];
-                return `${month}월 ${day}일 (${weekday})`;
-              };
-
-              // D-day 스타일 결정
-              let dDayStyle = "text-gray-500";
-              if (u.days === 0) {
-                dDayStyle = "text-red-500 font-bold";
-              } else if (u.days === 1) {
-                dDayStyle = "text-orange-500 font-semibold";
-              } else if (u.days <= 3) {
-                dDayStyle = "text-yellow-600 font-medium";
-              }
-
-              return (
-                <li key={i} className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50">
-                <span className="w-3 h-3 rounded-full" style={{ backgroundColor: u.color }} />
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className={`${dDayStyle}`}>{u.d}</span>
-                      <span className="font-medium">{u.label}</span>
-                    </div>
-                    <div className="text-xs text-gray-400 mt-1">
-                      {formatDate(u.nextDate)}
-                    </div>
-                  </div>
-              </li>
-              );
-            })}
-          </ul>
-        )}
-      </Card>
 
       {confirm && (
         <Modal onClose={()=>setConfirm(null)}>
@@ -1670,12 +1679,12 @@ function HomeScreen({ timeline, routine, upcoming, onQuickAdd, onApplyTimeline }
 
 function ChipRow({ items, onAdd }) {
   return (
-    <div className="flex flex-wrap gap-3">
+    <div className="flex flex-wrap gap-3 lg:gap-4">
       {items.map((item) => (
         <button 
           key={item.label} 
           onClick={()=>onAdd(item)} 
-          className="min-w-[92px] h-12 rounded-2xl border px-4 text-gray-800 font-medium"
+          className="min-w-[92px] lg:min-w-[100px] h-12 lg:h-14 rounded-2xl border px-4 lg:px-6 text-gray-800 font-medium lg:text-base hover:shadow-md transition-shadow"
           style={{ backgroundColor: item.color }}
         >
           {item.label}
@@ -1692,13 +1701,13 @@ function HealthScreen({ weight, meds, walks, onAddWeight, onAddMed, onAddWalk, o
   const [sub, setSub] = useState("weight");
   return (
     <div>
-      <div className="flex gap-3 mb-4">
+      <div className="flex gap-3 mb-4 lg:mb-6">
         {[
           {id:"weight", label:"몸무게"},
           {id:"med", label:"투약 기록"},
           {id:"walk", label:"산책 기록"},
         ].map(t => (
-          <button key={t.id} onClick={()=>setSub(t.id)} className={`px-4 h-10 rounded-full border ${sub===t.id?"bg-black text-white":"bg-white"}`}>{t.label}</button>
+          <button key={t.id} onClick={()=>setSub(t.id)} className={`px-4 lg:px-6 h-10 lg:h-12 rounded-full border text-sm lg:text-base ${sub===t.id?"bg-black text-white":"bg-white"}`}>{t.label}</button>
         ))}
       </div>
 
@@ -2284,60 +2293,60 @@ function DiaryScreen() {
 
   return (
     <section>
-      <div className="font-semibold text-xl mb-4">다이어리</div>
+      <div className="font-semibold text-xl lg:text-2xl mb-4 lg:mb-6">다이어리</div>
       
       {/* 새 일기 작성 버튼 */}
       <button
         onClick={() => setShowModal(true)}
-        className="w-full h-12 rounded-2xl border border-dashed border-gray-300 text-gray-500 mb-6 flex items-center justify-center gap-2"
+        className="w-full h-12 lg:h-16 rounded-2xl border border-dashed border-gray-300 text-gray-500 mb-6 lg:mb-8 flex items-center justify-center gap-2 lg:text-lg"
       >
-        <span className="text-lg">+</span>
+        <span className="text-lg lg:text-xl">+</span>
         <span>새 일기 작성</span>
       </button>
 
       {/* 일기 목록 */}
-      <div className="space-y-4">
+      <div className="space-y-4 lg:space-y-6">
         <div className="flex items-center justify-between">
-          <div className="font-semibold text-lg">일기 피드</div>
+          <div className="font-semibold text-lg lg:text-xl">일기 피드</div>
           <button
             type="button"
             onClick={() => setEditMode(v => !v)}
-            className="w-8 h-8 grid place-items-center rounded-lg border"
+            className="w-8 h-8 lg:w-10 lg:h-10 grid place-items-center rounded-lg border"
             title={editMode ? "완료" : "편집"}
             aria-pressed={editMode}
           >
             {editMode ? (
-              <span className="text-xs font-medium">완료</span>
+              <span className="text-xs lg:text-sm font-medium">완료</span>
             ) : (
-              <img src="/img/edit.png" alt="편집" className="w-4 h-4" />
+              <img src="/img/edit.png" alt="편집" className="w-4 h-4 lg:w-5 lg:h-5" />
             )}
           </button>
         </div>
         {entries.length === 0 ? (
-          <div className="text-center py-8 text-gray-400">
-            <div className="text-lg mb-2">아직 작성된 일기가 없어요</div>
-            <div className="text-sm">첫 번째 일기를 작성해보세요!</div>
+          <div className="text-center py-8 lg:py-12 text-gray-400">
+            <div className="text-lg lg:text-xl mb-2">아직 작성된 일기가 없어요</div>
+            <div className="text-sm lg:text-base">첫 번째 일기를 작성해보세요!</div>
           </div>
         ) : (
           entries.slice().reverse().map((entry, index) => (
             <Card key={entry.id}>
-              <div className="space-y-3">
+              <div className="space-y-3 lg:space-y-4">
                 <div className="flex items-center justify-between">
-                  <div className="text-sm text-gray-500">{entry.date}</div>
+                  <div className="text-sm lg:text-base text-gray-500">{entry.date}</div>
                   <div className="flex items-center gap-2">
-                    <div className="text-sm text-gray-400">#{entry.id}</div>
+                    <div className="text-sm lg:text-base text-gray-400">#{entry.id}</div>
                     {editMode && (
                       <>
                         <button
                           onClick={() => editEntry(entry)}
-                          className="w-6 h-6 grid place-items-center rounded-full border text-xs text-gray-600"
+                          className="w-6 h-6 lg:w-8 lg:h-8 grid place-items-center rounded-full border text-xs lg:text-sm text-gray-600"
                           title="편집"
                         >
-                          <img src="/img/edit.png" alt="편집" className="w-3 h-3" />
+                          <img src="/img/edit.png" alt="편집" className="w-3 h-3 lg:w-4 lg:h-4" />
                         </button>
                       <button
                         onClick={() => setDeleteModal({ index: entries.length - 1 - index, entry })}
-                        className="w-6 h-6 grid place-items-center rounded-full border text-xs text-gray-600"
+                        className="w-6 h-6 lg:w-8 lg:h-8 grid place-items-center rounded-full border text-xs lg:text-sm text-gray-600"
                         title="삭제"
                       >
                         ×
@@ -2346,10 +2355,10 @@ function DiaryScreen() {
                     )}
                   </div>
                 </div>
-                <div className="font-semibold text-lg">{entry.title}</div>
-                <div className="text-gray-700 whitespace-pre-wrap leading-relaxed">{entry.content}</div>
+                <div className="font-semibold text-lg lg:text-xl">{entry.title}</div>
+                <div className="text-gray-700 whitespace-pre-wrap leading-relaxed lg:text-base">{entry.content}</div>
                 {entry.image && (
-                  <img src={entry.image} alt="일기 이미지" className="w-full h-48 object-cover rounded-xl" />
+                  <img src={entry.image} alt="일기 이미지" className="w-full h-48 lg:h-64 object-cover rounded-xl" />
                 )}
               </div>
             </Card>
@@ -2547,16 +2556,16 @@ function SettingsScreen({ routine, onChange, medCategories, onMedCategoriesChang
 
   const Row = ({ title, list, where }) => (
     <div className="mb-6">
-      {title && <div className="text-sm text-gray-600 mb-2">{title}</div>}
-      <div className="flex flex-wrap gap-3">
+      {title && <div className="text-sm text-gray-600 mb-2 lg:text-base">{title}</div>}
+      <div className="flex flex-wrap gap-3 lg:gap-4">
         {list.map((item, index) => (
           <div key={item.label} className="relative">
             <button
               onClick={() => handleRoutineClick(where, index, item)}
-              className={`min-w-[92px] h-12 rounded-2xl border flex items-center justify-between px-4 ${editMode ? 'cursor-pointer' : ''}`}
+              className={`min-w-[92px] lg:min-w-[100px] h-12 lg:h-14 rounded-2xl border flex items-center justify-between px-4 lg:px-6 ${editMode ? 'cursor-pointer' : ''}`}
               style={{ backgroundColor: item.color }}
             >
-              <span>{item.label}</span>
+              <span className="lg:text-base">{item.label}</span>
               {editMode && (
                 <button
                   onClick={(e) => { e.stopPropagation(); setDeleteModal({ where, index, label: item.label }); }}
@@ -2579,7 +2588,7 @@ function SettingsScreen({ routine, onChange, medCategories, onMedCategoriesChang
             color: getRandomAvailableColor(where) 
           }); 
           setShowModal(true); 
-        }} className="min-w-[92px] h-12 rounded-2xl border border-dashed text-gray-400 text-sm">루틴 버튼 추가 +</button>
+        }} className="min-w-[92px] lg:min-w-[100px] h-12 lg:h-14 rounded-2xl border border-dashed text-gray-400 text-sm lg:text-base">루틴 버튼 추가 +</button>
       </div>
     </div>
   );
@@ -2587,26 +2596,34 @@ function SettingsScreen({ routine, onChange, medCategories, onMedCategoriesChang
   return (
     <section>
       <div className="mb-2">
-        <div className="font-semibold text-xl">카테고리 설정</div>
+        <div className="font-semibold text-xl lg:text-2xl">카테고리 설정</div>
       </div>
-      <div className="text-sm text-gray-600 mb-4">버튼을 편집하려면 원하는 버튼을 클릭하세요.</div>
-      <div className="font-semibold text-lg mb-2">데일리루틴</div>
-      <Row title="오전" list={routine.am} where="am" />
-      <Row title="오후" list={routine.pm} where="pm" />
-      <div className="font-semibold text-lg mt-2 mb-2">정기루틴</div>
-      <Row title="" list={routine.reg} where="reg" />
+      <div className="text-sm text-gray-600 mb-4 lg:mb-6">버튼을 편집하려면 원하는 버튼을 클릭하세요.</div>
       
-      <div className="font-semibold text-lg mt-6 mb-2">약 카테고리</div>
+      <div className="lg:grid lg:grid-cols-2 lg:gap-8 lg:space-y-0 space-y-6">
+        <div>
+          <div className="font-semibold text-lg mb-2 lg:text-xl">데일리루틴</div>
+          <Row title="오전" list={routine.am} where="am" />
+          <Row title="오후" list={routine.pm} where="pm" />
+        </div>
+        
+        <div>
+          <div className="font-semibold text-lg mb-2 lg:text-xl">정기루틴</div>
+          <Row title="" list={routine.reg} where="reg" />
+        </div>
+      </div>
+      
+      <div className="font-semibold text-lg mt-6 mb-2 lg:text-xl">약 카테고리</div>
       <div className="mb-6">
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-wrap gap-3 lg:gap-4">
           {medCategories.map((med, index) => (
             <div key={med.name} className="relative">
               <button
                 onClick={() => editMode && editMedCategory(index, med)}
-                className={`min-w-[92px] h-12 rounded-2xl border flex items-center justify-between px-4 ${editMode ? 'cursor-pointer' : ''}`}
+                className={`min-w-[92px] lg:min-w-[100px] h-12 lg:h-14 rounded-2xl border flex items-center justify-between px-4 lg:px-6 ${editMode ? 'cursor-pointer' : ''}`}
                 style={{ backgroundColor: med.color }}
               >
-                <span className="text-sm">{med.name}</span>
+                <span className="text-sm lg:text-base">{med.name}</span>
                 {editMode && (
                   <button
                     onClick={(e) => { e.stopPropagation(); setDeleteMedModal({ index, med }); }}
@@ -2619,7 +2636,7 @@ function SettingsScreen({ routine, onChange, medCategories, onMedCategoriesChang
               </button>
             </div>
           ))}
-          <button onClick={() => { setShowMedModal(true); setEditingMed(null); setNewMed({ name: "", dose: "", color: "#DDEFFF", frequency: "once" }); }} className="min-w-[92px] h-12 rounded-2xl border border-dashed text-gray-400 text-sm">약 버튼 추가 +</button>
+          <button onClick={() => { setShowMedModal(true); setEditingMed(null); setNewMed({ name: "", dose: "", color: "#DDEFFF", frequency: "once" }); }} className="min-w-[92px] lg:min-w-[100px] h-12 lg:h-14 rounded-2xl border border-dashed text-gray-400 text-sm lg:text-base">약 버튼 추가 +</button>
         </div>
       </div>
 
@@ -2859,7 +2876,7 @@ function SettingsScreen({ routine, onChange, medCategories, onMedCategoriesChang
  ***************************/
 function Card({ children, className="" }) {
   return (
-    <div className={`bg-white rounded-2xl border p-4 ${className}`}>{children}</div>
+    <div className={`bg-white rounded-2xl border p-4 lg:p-6 ${className}`}>{children}</div>
   );
 }
 
@@ -2890,7 +2907,7 @@ function Modal({ children, onClose }) {
   return (
     <div className="fixed inset-0 z-20 flex items-center justify-center px-6">
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <div className="relative w-full max-w-[380px] bg-white rounded-2xl border p-4 shadow-lg">
+      <div className="relative w-full max-w-[380px] lg:max-w-md xl:max-w-lg bg-white rounded-2xl border p-4 lg:p-6 shadow-lg">
         {children}
       </div>
     </div>
