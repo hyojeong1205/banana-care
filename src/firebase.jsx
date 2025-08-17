@@ -5,13 +5,13 @@ import { getAuth, GoogleAuthProvider } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCmmIn2xhY2TCr7Qsdmm80wug2f4I4ZxMU",
-  authDomain: "bananacare-12432.firebaseapp.com",
-  projectId: "bananacare-12432",
-  storageBucket: "bananacare-12432.firebasestorage.app",
-  messagingSenderId: "489425905298",
-  appId: "1:489425905298:web:6f3a1bb68179fe5650284b",
-  measurementId: "G-08SR58ND6L",
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyCmmIn2xhY2TCr7Qsdmm80wug2f4I4ZxMU",
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "bananacare-12432.firebaseapp.com",
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "bananacare-12432",
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "bananacare-12432.firebasestorage.app",
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "489425905298",
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:489425905298:web:6f3a1bb68179fe5650284b",
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || "G-08SR58ND6L",
 };
 
 const app = initializeApp(firebaseConfig);
