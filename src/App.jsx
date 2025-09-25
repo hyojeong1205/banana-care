@@ -1509,7 +1509,24 @@ function HomeScreen({ timeline, routine, upcoming, onQuickAdd, onApplyTimeline }
   }, [confirm, onQuickAdd]);
   return (
     <div className="space-y-6 lg:space-y-8">
-      {/* PC에서 2열 레이아웃 */}
+      {/* 데일리루틴 + 정기루틴을 상단으로 */}
+      <section>
+        <h3 className="font-semibold text-lg mb-2 lg:text-xl">데일리루틴</h3>
+        <div className="lg:grid lg:grid-cols-2 lg:gap-8">
+          <div>
+            <div className="text-sm text-gray-500 mb-1">오전</div>
+            <ChipRow items={routine.am} onAdd={(item)=>setConfirm({ label:item.label, color: item.color, date: todayStr(), time: nowTime() })} />
+          </div>
+          <div>
+            <div className="text-sm text-gray-500 mb-1">오후</div>
+            <ChipRow items={routine.pm} onAdd={(item)=>setConfirm({ label:item.label, color: item.color, date: todayStr(), time: nowTime() })} />
+          </div>
+        </div>
+        <h4 className="font-semibold text-lg mt-5 mb-2 lg:text-xl">정기루틴</h4>
+        <ChipRow items={routine.reg} onAdd={(item)=>setConfirm({ label:item.label, color: item.color, date: todayStr(), time: nowTime() })} />
+      </section>
+
+      {/* PC에서 2열 레이아웃: 오늘 케어 기록 + 다가오는 일정 (하단으로 이동) */}
       <div className="lg:grid lg:grid-cols-2 lg:gap-8 lg:space-y-0 space-y-6">
         {/* 오늘 요약 */}
         <Card>
@@ -1582,7 +1599,6 @@ function HomeScreen({ timeline, routine, upcoming, onQuickAdd, onApplyTimeline }
           ) : (
             <ul className="space-y-3 text-sm">
               {upcoming.map((u, i) => {
-                // 날짜 포맷팅
                 const formatDate = (date) => {
                   const month = date.getMonth() + 1;
                   const day = date.getDate();
@@ -1590,7 +1606,6 @@ function HomeScreen({ timeline, routine, upcoming, onQuickAdd, onApplyTimeline }
                   return `${month}월 ${day}일 (${weekday})`;
                 };
 
-                // D-day 스타일 결정
                 let dDayStyle = "text-gray-500";
                 if (u.days === 0) {
                   dDayStyle = "text-red-500 font-bold";
@@ -1619,23 +1634,6 @@ function HomeScreen({ timeline, routine, upcoming, onQuickAdd, onApplyTimeline }
           )}
         </Card>
       </div>
-
-      {/* 데일리루틴 */}
-      <section>
-        <h3 className="font-semibold text-lg mb-2 lg:text-xl">데일리루틴</h3>
-        <div className="lg:grid lg:grid-cols-2 lg:gap-8">
-          <div>
-            <div className="text-sm text-gray-500 mb-1">오전</div>
-            <ChipRow items={routine.am} onAdd={(item)=>setConfirm({ label:item.label, color: item.color, date: todayStr(), time: nowTime() })} />
-          </div>
-          <div>
-            <div className="text-sm text-gray-500 mb-1">오후</div>
-            <ChipRow items={routine.pm} onAdd={(item)=>setConfirm({ label:item.label, color: item.color, date: todayStr(), time: nowTime() })} />
-          </div>
-        </div>
-        <h4 className="font-semibold text-lg mt-5 mb-2 lg:text-xl">정기루틴</h4>
-        <ChipRow items={routine.reg} onAdd={(item)=>setConfirm({ label:item.label, color: item.color, date: todayStr(), time: nowTime() })} />
-      </section>
 
       {confirm && (
         <Modal onClose={()=>setConfirm(null)}>
