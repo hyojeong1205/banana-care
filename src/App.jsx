@@ -1483,6 +1483,7 @@ function HomeScreen({ timeline, routine, upcoming, onQuickAdd, onApplyTimeline }
   const [editMode, setEditMode] = useState(false);
   const [draftTimeline, setDraftTimeline] = useState(null);
   const [confirm, setConfirm] = useState(null); // {label,color,date,time}
+  const [editModal, setEditModal] = useState(null); // {index,label,date,time}
 
   // 키보드 이벤트 처리
   useEffect(() => {
@@ -1569,7 +1570,23 @@ function HomeScreen({ timeline, routine, upcoming, onQuickAdd, onApplyTimeline }
                   <li key={idx} className="flex items-center gap-3">
                     <span className="w-3 h-3 rounded-full" style={{ backgroundColor: t.color || "#E6F4EA" }} />
                     <span className="text-sm text-gray-500 w-20">{t.time}</span>
-                    <span className="text-sm">{t.label}</span>
+                    {editMode ? (
+                      <button
+                        type="button"
+                        className="text-sm text-left underline decoration-dotted"
+                        onClick={() => setEditModal({
+                          index: originalIndex,
+                          label: t.label || "",
+                          date: t.date || todayStr(),
+                          time: t.time || nowTime(),
+                        })}
+                        title="편집"
+                      >
+                        {t.label}
+                      </button>
+                    ) : (
+                      <span className="text-sm">{t.label}</span>
+                    )}
                       {editMode && (
                         <button
                           type="button"
@@ -1666,6 +1683,62 @@ function HomeScreen({ timeline, routine, upcoming, onQuickAdd, onApplyTimeline }
                 autoFocus
               >
                 확인
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
+
+      {editMode && editModal && (
+        <Modal onClose={() => setEditModal(null)}>
+          <div className="space-y-4 text-center">
+            <div className="font-semibold text-lg">기록 편집</div>
+            <div className="space-y-3 text-left">
+              <div className="flex items-center gap-3">
+                <span className="text-sm text-gray-600 w-16">항목</span>
+                <input
+                  type="text"
+                  value={editModal.label}
+                  onChange={(e)=>setEditModal(prev=>({ ...prev, label: e.target.value }))}
+                  className="flex-1 px-3 py-2 rounded-xl border"
+                  placeholder="항목 이름"
+                  autoFocus
+                />
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-sm text-gray-600 w-16">날짜</span>
+                <input
+                  type="date"
+                  value={editModal.date}
+                  onChange={(e)=>setEditModal(prev=>({ ...prev, date: e.target.value }))}
+                  className="flex-1 px-3 py-2 rounded-xl border"
+                />
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-sm text-gray-600 w-16">시간</span>
+                <input
+                  type="time"
+                  value={editModal.time}
+                  onChange={(e)=>setEditModal(prev=>({ ...prev, time: e.target.value }))}
+                  className="flex-1 px-3 py-2 rounded-xl border"
+                />
+              </div>
+            </div>
+            <div className="flex gap-2 justify-center pt-2">
+              <button className="px-3 py-2 rounded-xl border" onClick={()=>setEditModal(null)}>취소</button>
+              <button
+                className="px-3 py-2 rounded-xl border bg-black text-white"
+                onClick={() => {
+                  const nextLabel = String(editModal.label || "").trim();
+                  if (!nextLabel) return;
+                  setDraftTimeline(prev => prev.map((item, i) => {
+                    if (i !== editModal.index) return item;
+                    return { ...item, label: nextLabel, date: editModal.date, time: editModal.time };
+                  }));
+                  setEditModal(null);
+                }}
+              >
+                저장
               </button>
             </div>
           </div>
